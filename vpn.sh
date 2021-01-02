@@ -1453,7 +1453,7 @@ elif [[ "${action}" == "monitor" ]]; then
 	crontab_monitor_ssr
 else
 	domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
- echo -e "${Green_background_prefix}Chieftain ShadowSocks USER CONTROL${Font_color_suffix}
+ echo -e "${Green_background_prefix}Chieftain && xyl1gun4eg SSpro Control${Font_color_suffix}
  
  Ты зашёл на сервер ${Green_background_prefix}$domainofserver${Font_color_suffix}
 
