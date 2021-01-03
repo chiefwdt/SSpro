@@ -1457,7 +1457,7 @@ echo -e " Скрипт установки и модерации сервера S
 "
 domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
  
- Ты зашёл на сервер ${Green_background_prefix}$domainofserver${Font_color_suffix}
+echo -e Ты зашёл на сервер ${Green_background_prefix}$domainofserver${Font_color_suffix}
 
   ${Green_font_prefix}1.${Font_color_suffix} Создать ключ
   ${Green_font_prefix}2.${Font_color_suffix} Удалить ключ
