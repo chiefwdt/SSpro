@@ -1490,7 +1490,15 @@ elif [[ "${action}" == "monitor" ]]; then
 else
 	domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
  echo -e "${Red_background_prefix}Chieftain && xyl1gun4eg && Veron [SSpro Control] Stable${Font_color_suffix}
- 
+ serverip123="$(curl "ifconfig.me")"
+	clear
+	echo
+	echo
+	echo  -e " {Green_font_prefix}Chieftain && xyl1gun4eg && Veron${Font_color_suffix} ${Green_font_prefix}[SSpro Control]${Green_font_prefix} "
+	echo
+echo -e "Приветствую, администратор сервера!  Дата: $(date +"%d-%m-%Y")
+  echo -e "
+  IP сервера: $serverip123
  Ты на сервере ${Green_background_prefix}$domainofserver${Font_color_suffix}
 
   ${Green_font_prefix}1.${Font_color_suffix} Создать ключ
