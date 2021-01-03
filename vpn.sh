@@ -1489,11 +1489,11 @@ elif [[ "${action}" == "monitor" ]]; then
 	crontab_monitor_ssr
 else
         domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
-        serverip123="$(curl "ifconfig.me")
+        $serverip123="$(curl "ifconfig.me")
 	clear
 	echo
 	echo
-	echo  -e " {Green_font_prefix}Chieftain && xyl1gun4eg && Veron${Font_color_suffix} ${Green_font_prefix}[SSpro Control]${Green_font_prefix} "
+	echo  -e " ${Green_font_prefix}Chieftain && xyl1gun4eg && Veron${Font_color_suffix} ${Green_font_prefix}[SSpro Control]${Green_font_prefix} "
 	echo
         echo -e "Приветствую, администратор сервера!  Дата: $(date +"%d-%m-%Y")
         echo -e "
