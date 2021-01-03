@@ -1479,10 +1479,10 @@ else
   ${Green_font_prefix}8.${Font_color_suffix} Очистить трафик
   ${Green_font_prefix}9.${Font_color_suffix} Изменить конфигурацию вручную
 ————————————
- ${Green_font_prefix}10.${Font_color_suffix} Установить Libsodium
+ ${Green_font_prefix}10.${Font_color_suffix} Вкл ShadowSocksR
  ${Green_font_prefix}11.${Font_color_suffix} Выкл ShadowSocksR
- ${Green_font_prefix}12.${Font_color_suffix} Вкл ShadowSocksR
- ${Green_font_prefix}13.${Font_color_suffix} Перезапустить ShadowsocksR
+ ${Green_font_prefix}12.${Font_color_suffix} Перезапустить ShadowSocksR
+ ${Green_font_prefix}13.${Font_color_suffix} Установить Libsodium
  ${Green_font_prefix}14.${Font_color_suffix} Установить ShadowSocksR
  ${Green_font_prefix}15.${Font_color_suffix} Удалить ShadowSocksR
 ————————————
@@ -1521,16 +1521,16 @@ case "$num" in
 	Manually_Modify_Config
 	;;
 	10)
-	Install_Libsodium
+	Start_SSR
 	;;
 	11)
 	Stop_SSR
 	;;
 	12)
-	Start_SSR
+	Restart_SSR
 	;;
 	13)
-	Restart_SSR
+	Install_Libsodium
 	;;
 	14)
 	Install_SSR
