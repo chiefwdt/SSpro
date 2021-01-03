@@ -1452,21 +1452,23 @@ if [[ "${action}" == "clearall" ]]; then
 elif [[ "${action}" == "monitor" ]]; then
 	crontab_monitor_ssr
 else
-	domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
- echo -e "${Green_background_prefix}Chieftain && xyl1gun4eg SSpro Control${Font_color_suffix}
+echo -e " Скрипт установки и модерации сервера ShadowSocks PRO
+	Разработчики ${Red_font_prefix}---- Chieftain| xyl1gun4eg | Veron ----${Font_color_suffix}
+"
+domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
  
  Ты зашёл на сервер ${Green_background_prefix}$domainofserver${Font_color_suffix}
 
   ${Green_font_prefix}1.${Font_color_suffix} Создать ключ
   ${Green_font_prefix}2.${Font_color_suffix} Удалить ключ
-  ${Green_font_prefix}3.${Font_color_suffix} Изменить пароль 
+  ${Green_font_prefix}3.${Font_color_suffix} Изменить пароль ключа
   ${Green_font_prefix}4.${Font_color_suffix} Информация о клиентах
 ————————————
-  ${Green_font_prefix}5.${Font_color_suffix} Выгрузить БД
-  ${Green_font_prefix}6.${Font_color_suffix} Загрузить БД
+  ${Green_font_prefix}5.${Font_color_suffix} Выгрузить Базу Данных
+  ${Green_font_prefix}6.${Font_color_suffix} Загрузить Базу Данных
  ————————————
   ${Green_font_prefix}7.${Font_color_suffix} Очистить трафик
-  ${Green_font_prefix}8.${Font_color_suffix} Изменить конфигурацию
+  ${Green_font_prefix}8.${Font_color_suffix} Изменить конфигурацию ключей
 ————————————
   ${Green_font_prefix}9.${Font_color_suffix} Установить ShadowSocks
  ${Green_font_prefix}10.${Font_color_suffix} Установить Libsodium
