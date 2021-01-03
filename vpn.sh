@@ -21,7 +21,7 @@ jq_file="${ssr_folder}/jq"
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[Информация]${Font_color_suffix}"
 Error="${Red_font_prefix}[Ошибка]${Font_color_suffix}"
-Tip="${Green_font_prefix}[Заметка]${Font_color_suffix}"
+T="${Green_font_prefix}[Заметка]${Font_color_suffix}"
 Separator_1="——————————————————————————————"
 
 
@@ -579,7 +579,7 @@ Set_user_api_server_pub_addr(){
 		fi
 	fi
 	echo "Введите IP сервера"
-	read -e -p "(Автоматическое определние IP при нажатии Enter):" ssr_server_pub_addr
+	read -e -p "(Автоматическое определение IP при нажатии Enter):" ssr_server_pub_addr
 	if [[ -z "${ssr_server_pub_addr}" ]]; then
 		Get_IP
 		if [[ ${ip} == "VPS_IP" ]]; then
@@ -1074,7 +1074,7 @@ Modify_port(){
 	List_port_user
 	while true
 	do
-		echo -e "Введите порт пользователя, аккаунт которого нужно изменить"
+		echo -e "Введите порт пользователя который нужно изменить!"
 		read -e -p "(По умолчанию: отмена):" ssr_port
 		[[ -z "${ssr_port}" ]] && echo -e "已取消..." && exit 1
 		Modify_user=$(cat "${config_user_mudb_file}"|grep '"port": '"${ssr_port}"',')
@@ -1092,7 +1092,7 @@ Modify_Config(){
  ${Green_font_prefix}2.${Font_color_suffix}  Удалить конфигурацию пользователя
 ————— Изменить конфигурацию пользователя —————
  ${Green_font_prefix}3.${Font_color_suffix}  Изменить пароль пользователя
- ${Green_font_prefix}4.${Font_color_suffix}  Изменить метод шифорвания
+ ${Green_font_prefix}4.${Font_color_suffix}  Изменить метод шифрования
  ${Green_font_prefix}5.${Font_color_suffix}  Изменить протокол
  ${Green_font_prefix}6.${Font_color_suffix}  Изменить obfs плагин
  ${Green_font_prefix}7.${Font_color_suffix}  Изменить количество устройств
@@ -1104,7 +1104,7 @@ Modify_Config(){
 ————— Другое —————
  ${Green_font_prefix}13.${Font_color_suffix} Изменить IP адрес для пользователя
  
- ${Tip} Для изменения имени пользователя и его порта используйте ручную модификацию !" && echo
+ ${Tip} Для изменения имени пользователя или порта используйте ручную модификацию !" && echo
 	read -e -p "(По умолчанию: отмена):" ssr_modify
 	[[ -z "${ssr_modify}" ]] && echo "Отмена..." && exit 1
 	if [[ ${ssr_modify} == "1" ]]; then
@@ -1240,19 +1240,19 @@ Del_port_user(){
 			port=${del_user_port}
 			match_del=$(python mujson_mgr.py -d -p "${del_user_port}"|grep -w "delete user ")
 			if [[ -z "${match_del}" ]]; then
-				echo -e "${Error} Удаление пользователя неуспешно ${Green_font_prefix}[Порт: ${del_user_port}]${Font_color_suffix} "
+				echo -e "${Error} Ошибка удаления пользователя! ${Green_font_prefix}[Порт: ${del_user_port}]${Font_color_suffix} "
 				break
 			else
 				Del_iptables
 				Save_iptables
-				echo -e "${Info} Удаление пользователя успешно ${Green_font_prefix}[Порт: ${del_user_port}]${Font_color_suffix} "
+				echo -e "${Info} Удаление пользователя успешно завершено ${Green_font_prefix}[Порт: ${del_user_port}]${Font_color_suffix} "
 				echo
 				read -e -p "Хотите продолжить удаление пользователей？[Y/n]:" delyn
 				[[ -z ${delyn} ]] && delyn="y"
 				if [[ ${delyn} == [Nn] ]]; then
 					break
 				else
-					echo -e "${Info} Продолжение удаления конфигурации пользователя..."
+					echo -e "${Info} Продолжение удаления пользователей..."
 					Del_port_user
 				fi
 			fi
@@ -1265,7 +1265,7 @@ Del_port_user(){
 Manually_Modify_Config(){
 	SSR_installation_status
 	nano ${config_user_mudb_file}
-	echo "Вы хотите перезагрузить ShadowsocksR сейчас？[Y/n]" && echo
+	echo "Перезапустить ShadowsocksR？[Y/n]" && echo
 	read -e -p "(По умолчанию: y):" yn
 	[[ -z ${yn} ]] && yn="y"
 	if [[ ${yn} == [Yy] ]]; then
@@ -1285,7 +1285,7 @@ Clear_transfer(){
 	if [[ ${ssr_modify} == "1" ]]; then
 		Clear_transfer_one
 	elif [[ ${ssr_modify} == "2" ]]; then
-		echo "Вы действительно хотите удалить трафик всех пользователей？[y/N]" && echo
+		echo "Вы действительно хотите очистить трафик всех пользователей？[y/N]" && echo
 		read -e -p "(По умолчанию: n):" yn
 		[[ -z ${yn} ]] && yn="n"
 		if [[ ${yn} == [Yy] ]]; then
@@ -1311,16 +1311,16 @@ Clear_transfer_one(){
 	List_port_user
 	while true
 	do
-		echo -e "Введите порт пользователя, трафик которого нужно удалить"
+		echo -e "Введите порт пользователя, трафик которого нужно очистить"
 		read -e -p "(По умолчанию: отмена):" Clear_transfer_user_port
 		[[ -z "${Clear_transfer_user_port}" ]] && echo -e "Отмена..." && exit 1
 		Clear_transfer_user=$(cat "${config_user_mudb_file}"|grep '"port": '"${Clear_transfer_user_port}"',')
 		if [[ ! -z ${Clear_transfer_user} ]]; then
 			match_clear=$(python mujson_mgr.py -c -p "${Clear_transfer_user_port}"|grep -w "clear user ")
 			if [[ -z "${match_clear}" ]]; then
-				echo -e "${Error} Не удалось удалить трафик пользователя! ${Green_font_prefix}[Порт: ${Clear_transfer_user_port}]${Font_color_suffix} "
+				echo -e "${Error} Не удалось очистить трафик пользователя! ${Green_font_prefix}[Порт: ${Clear_transfer_user_port}]${Font_color_suffix} "
 			else
-				echo -e "${Info} Трафик пользователя успешно удален! ${Green_font_prefix}[Порт: ${Clear_transfer_user_port}]${Font_color_suffix} "
+				echo -e "${Info} Трафик пользователя успешно очищен! ${Green_font_prefix}[Порт: ${Clear_transfer_user_port}]${Font_color_suffix} "
 			fi
 			break
 		else
@@ -1338,12 +1338,12 @@ Clear_transfer_all(){
 		user_port=$(echo "${user_info}"|sed -n "${integer}p"|awk '{print $4}')
 		match_clear=$(python mujson_mgr.py -c -p "${user_port}"|grep -w "clear user ")
 		if [[ -z "${match_clear}" ]]; then
-			echo -e "${Error} Не удалось удалить трафик пользователя!  ${Green_font_prefix}[Порт: ${user_port}]${Font_color_suffix} "
+			echo -e "${Error} Не удалось очистить трафик пользователя!  ${Green_font_prefix}[Порт: ${user_port}]${Font_color_suffix} "
 		else
-			echo -e "${Info} Трафик пользователя успешно удален! ${Green_font_prefix}[Порт: ${user_port}]${Font_color_suffix} "
+			echo -e "${Info} Трафик пользователя успешно очищен! ${Green_font_prefix}[Порт: ${user_port}]${Font_color_suffix} "
 		fi
 	done
-	echo -e "${Info} Весь трафик пользователей успешно удален !"
+	echo -e "${Info} Весь трафик пользователей успешно очищен !"
 }
 Clear_transfer_all_cron_start(){
 	crontab -l > "$file/crontab.bak"
@@ -1353,9 +1353,9 @@ Clear_transfer_all_cron_start(){
 	rm -r "$file/crontab.bak"
 	cron_config=$(crontab -l | grep "ssrmu.sh")
 	if [[ -z ${cron_config} ]]; then
-		echo -e "${Error} Удаление трафика пользователей регулярно не запущено !" && exit 1
+		echo -e "${Error} Очистка трафика пользователей регулярно не запущено !" && exit 1
 	else
-		echo -e "${Info} Удаление трафика пользователей регулярно запущено !"
+		echo -e "${Info} Очистка трафика пользователей регулярно запущено !"
 	fi
 }
 Clear_transfer_all_cron_stop(){
@@ -1379,12 +1379,12 @@ Set_crontab(){
 		echo -e "Введите временный интервал для очистки трафика
  === Описание формата ===
  * * * * * Минуты, часы, дни, месяцы, недели
- ${Green_font_prefix} 0 2 1 * * ${Font_color_suffix} Означает каждый месяц 1ого числа в 2 часа
- ${Green_font_prefix} 0 2 15 * * ${Font_color_suffix} Означает каждый месяц 15ого числа в 2 часа
+ ${Green_font_prefix} 0 2 1 * * ${Font_color_suffix} Означает каждый месяц 1-го числа в 2 часа
+ ${Green_font_prefix} 0 2 15 * * ${Font_color_suffix} Означает каждый месяц 15-го числа в 2 часа
  ${Green_font_prefix} 0 2 */7 * * ${Font_color_suffix} Каждые 7 дней в 2 часа
  ${Green_font_prefix} 0 2 * * 0 ${Font_color_suffix} Каждое воскресенье
  ${Green_font_prefix} 0 2 * * 3 ${Font_color_suffix} Каждую среду" && echo
-	read -e -p "(По умолчанию: 0 2 1 * * Тоесть каждое 1ое число месяца в 2 часа):" Crontab_time
+	read -e -p "(По умолчанию: 0 2 1 * * Тоесть каждое 1-е число месяца в 2 часа):" Crontab_time
 	[[ -z "${Crontab_time}" ]] && Crontab_time="0 2 1 * *"
 }
 Start_SSR(){
@@ -1398,6 +1398,42 @@ Stop_SSR(){
 	check_pid
 	[[ -z ${PID} ]] && echo -e "${Error} ShadowsocksR не запущен !" && exit 1
 	/etc/init.d/ssrmu stop
+}
+Server_IP_Checker(){
+	 echo -e "IP данного сервера = $(curl "ifconfig.me") " && echo
+}
+Set_user_api_server_pub_addr(){
+	addr=$1
+	if [[ "${addr}" == "Modify" ]]; then
+		server_pub_addr=$(cat ${config_user_api_file}|grep "SERVER_PUB_ADDR = "|awk -F "[']" '{print $2}')
+		if [[ -z ${server_pub_addr} ]]; then
+			echo -e "${Error} Не удалось получить IP сервера！" && exit 1
+		else
+			echo -e "${Info} Текущий IP： ${Green_font_prefix}${server_pub_addr}${Font_color_suffix}"
+		fi
+	fi
+	echo "Введите доменное имя или IP-адрес сервера"
+	read -e -p "(Автоматическое определение IP при нажатии Enter):" ssr_server_pub_addr
+	if [[ -z "${ssr_server_pub_addr}" ]]; then
+		Get_IP
+		if [[ ${ip} == "VPS_IP" ]]; then
+			while true
+			do
+			read -e -p "${Error} Введите IP сервера вручную!" ssr_server_pub_addr
+			if [[ -z "$ssr_server_pub_addr" ]]; then
+				echo -e "${Error} Не может быть пустым！"
+			else
+				break
+			fi
+			done
+		else
+			ssr_server_pub_addr="${ip}"
+		fi
+	fi
+	echo && echo ${Separator_1} && echo -e "	IP сервера : ${Green_font_prefix}${ssr_server_pub_addr}${Font_color_suffix}" && echo ${Separator_1} && echo
+}
+Modify_user_api_server_pub_addr(){
+	sed -i "s/SERVER_PUB_ADDR = '${server_pub_addr}'/SERVER_PUB_ADDR = '${ssr_server_pub_addr}'/" ${config_user_api_file}
 }
 Restart_SSR(){
 	SSR_installation_status
@@ -1452,34 +1488,34 @@ if [[ "${action}" == "clearall" ]]; then
 elif [[ "${action}" == "monitor" ]]; then
 	crontab_monitor_ssr
 else
-echo -e " Скрипт установки и модерации сервера ShadowSocks PRO
-	Разработчики ${Red_font_prefix}---- Chieftain| xyl1gun4eg | Veron ----${Font_color_suffix}
-"
-domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
+	domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
+ echo -e "${Green_background_prefix}Chieftain && xyl1gun4eg SSpro Control${Font_color_suffix}
  
-echo -e Ты зашёл на сервер ${Green_background_prefix}$domainofserver${Font_color_suffix}
+ Ты на сервере ${Green_background_prefix}$domainofserver${Font_color_suffix}
 
   ${Green_font_prefix}1.${Font_color_suffix} Создать ключ
   ${Green_font_prefix}2.${Font_color_suffix} Удалить ключ
-  ${Green_font_prefix}3.${Font_color_suffix} Изменить пароль ключа
+  ${Green_font_prefix}3.${Font_color_suffix} Изменить пароль
   ${Green_font_prefix}4.${Font_color_suffix} Информация о клиентах
+  ${Green_font_prefix}5.${Font_color_suffix} Изменить адрес сервера
 ————————————
-  ${Green_font_prefix}5.${Font_color_suffix} Выгрузить Базу Данных
-  ${Green_font_prefix}6.${Font_color_suffix} Загрузить Базу Данных
+  ${Green_font_prefix}6.${Font_color_suffix} Выгрузить БД
+  ${Green_font_prefix}7.${Font_color_suffix} Загрузить БД
  ————————————
-  ${Green_font_prefix}7.${Font_color_suffix} Очистить трафик
-  ${Green_font_prefix}8.${Font_color_suffix} Изменить конфигурацию ключей
+  ${Green_font_prefix}8.${Font_color_suffix} Очистить трафик
+  ${Green_font_prefix}9.${Font_color_suffix} Изменить конфигурацию
 ————————————
-  ${Green_font_prefix}9.${Font_color_suffix} Установить ShadowSocks
  ${Green_font_prefix}10.${Font_color_suffix} Установить Libsodium
- ${Green_font_prefix}11.${Font_color_suffix} Удалить ShadowSocks
- ${Green_font_prefix}12.${Font_color_suffix} Перезапустить ShadowsocksR
- ${Green_font_prefix}13.${Font_color_suffix} Выкл ShadowSocks
- ${Green_font_prefix}14.${Font_color_suffix} Вкл ShadowSocks
+ ${Green_font_prefix}11.${Font_color_suffix} Выкл ShadowSocksR
+ ${Green_font_prefix}12.${Font_color_suffix} Вкл ShadowSocksR
+ ${Green_font_prefix}13.${Font_color_suffix} Перезапустить ShadowsocksR
+ ${Green_font_prefix}14.${Font_color_suffix} Установить ShadowSocksR
+ ${Green_font_prefix}15.${Font_color_suffix} Удалить ShadowSocksR
+ ${Green_font_prefix}16.${Font_color_suffix} Просмотреть ip сервера
 ————————————
  "
 	menu_status
-	echo && read -e -p "Введите корректный номер [1-14]：" num
+	echo && read -e -p "Введите корректный номер [1-16]：" num
 case "$num" in
 	1)
 	Add_port_user
@@ -1496,37 +1532,44 @@ case "$num" in
 	View_User
 	;;
 	5)
-	Upload_DB
+	Set_user_api_server_pub_addr "Modify"
+	Modify_user_api_server_pub_addr
 	;;
 	6)
-	Download_DB
+	Upload_DB
 	;;
 	7)
-	Clear_transfer
+	Download_DB
 	;;
 	8)
-	Manually_Modify_Config
+	Clear_transfer
 	;;
 	9)
-	Install_SSR
+	Manually_Modify_Config
 	;;
 	10)
 	Install_Libsodium
 	;;
 	11)
-	Uninstall_SSR
-	;;
-	12)
-	Restart_SSR
-	;;
-	13)
 	Stop_SSR
 	;;
-	14)
+	12)
 	Start_SSR
+	;;
+	13)
+	Restart_SSR
+	;;
+	14)
+	Install_SSR
         ;;
+        15)
+	Uninstall_SSR
+        ;;
+        16)
+        Server_IP_Checker
+	     ;;
 	*)
-	echo -e "${Error} Введите корректный номер [1-14]"
+	echo -e "${Error} Введите корректный номер [1-16]"
 	;;
 esac
 fi
