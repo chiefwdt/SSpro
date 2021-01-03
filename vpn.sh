@@ -573,19 +573,19 @@ Set_user_api_server_pub_addr(){
 	if [[ "${addr}" == "Modify" ]]; then
 		server_pub_addr=$(cat ${config_user_api_file}|grep "SERVER_PUB_ADDR = "|awk -F "[']" '{print $2}')
 		if [[ -z ${server_pub_addr} ]]; then
-			echo -e "${Error} Не получилось получить IP сервера！" && exit 1
+			echo -e "${Error} Не удалось получить IP сервера！" && exit 1
 		else
 			echo -e "${Info} Текущий IP： ${Green_font_prefix}${server_pub_addr}${Font_color_suffix}"
 		fi
 	fi
-	echo "Введите IP сервера"
+	echo "Введите доменное имя или IP-адрес сервера"
 	read -e -p "(Автоматическое определение IP при нажатии Enter):" ssr_server_pub_addr
 	if [[ -z "${ssr_server_pub_addr}" ]]; then
 		Get_IP
 		if [[ ${ip} == "VPS_IP" ]]; then
 			while true
 			do
-			read -e -p "${Error} Введите IP сервера сами!" ssr_server_pub_addr
+			read -e -p "${Error} Введите IP сервера вручную!" ssr_server_pub_addr
 			if [[ -z "$ssr_server_pub_addr" ]]; then
 				echo -e "${Error} Не может быть пустым！"
 			else
@@ -1402,39 +1402,6 @@ Stop_SSR(){
 Server_IP_Checker(){
 	 echo -e "IP данного сервера = $(curl "ifconfig.me") " && echo
 }
-Set_user_api_server_pub_addr(){
-	addr=$1
-	if [[ "${addr}" == "Modify" ]]; then
-		server_pub_addr=$(cat ${config_user_api_file}|grep "SERVER_PUB_ADDR = "|awk -F "[']" '{print $2}')
-		if [[ -z ${server_pub_addr} ]]; then
-			echo -e "${Error} Не удалось получить IP сервера！" && exit 1
-		else
-			echo -e "${Info} Текущий IP： ${Green_font_prefix}${server_pub_addr}${Font_color_suffix}"
-		fi
-	fi
-	echo "Введите доменное имя или IP-адрес сервера"
-	read -e -p "(Автоматическое определение IP при нажатии Enter):" ssr_server_pub_addr
-	if [[ -z "${ssr_server_pub_addr}" ]]; then
-		Get_IP
-		if [[ ${ip} == "VPS_IP" ]]; then
-			while true
-			do
-			read -e -p "${Error} Введите IP сервера вручную!" ssr_server_pub_addr
-			if [[ -z "$ssr_server_pub_addr" ]]; then
-				echo -e "${Error} Не может быть пустым！"
-			else
-				break
-			fi
-			done
-		else
-			ssr_server_pub_addr="${ip}"
-		fi
-	fi
-	echo && echo ${Separator_1} && echo -e "	IP сервера : ${Green_font_prefix}${ssr_server_pub_addr}${Font_color_suffix}" && echo ${Separator_1} && echo
-}
-Modify_user_api_server_pub_addr(){
-	sed -i "s/SERVER_PUB_ADDR = '${server_pub_addr}'/SERVER_PUB_ADDR = '${ssr_server_pub_addr}'/" ${config_user_api_file}
-}
 Restart_SSR(){
 	SSR_installation_status
 	check_pid
@@ -1459,10 +1426,10 @@ Upload_DB(){
 	echo -e "${Green_font_prefix}Перед вам выйдет строка с ссылкой на файлообменник, откуда вы сможете скачать базу данных. 
 	Пример строки:{'success':'true','key':**********,'link':https://file.io/***********,'expiry':14 days} 
 	Введите строку из поля 'link' в браузере, и ваша база данных будет скачана. ${Font_color_suffix}"
-	curl -F "file=@/usr/local/shadowsocksr/mudb.json" "https://file.io" && echo -e "${Green_font_prefix}Закрытие программы...${Font_color_suffix}"
+	curl -F "file=@/usr/local/shadowsocksr/mudb.json" "https://file.io" && echo -e "${Green_font_prefix}Закрытие скрипта...${Font_color_suffix}"
 }
 Download_DB(){
-	echo -e "${Green_font_prefix} Внимание: это приведет к перезаписи всей базы пользователей, вы готовы что хотите продолжить?${Font_color_suffix}(y/n)"
+	echo -e "${Green_font_prefix} Внимание: это приведет к перезаписи всей базы пользователей, вы уверены что хотите продолжить?${Font_color_suffix}(y/n)"
 	read -e -p "(По умолчанию: отмена):" base_override
 	[[ -z "${base_override}" ]] && echo "Отмена..." && exit 1
 	if [[ ${base_override} == "y" ]]; then
@@ -1489,13 +1456,13 @@ elif [[ "${action}" == "monitor" ]]; then
 	crontab_monitor_ssr
 else
         domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
-        $serverip123="$(curl "ifconfig.me")
+        serverip123=$(curl ifconfig.me)
 	clear
 	echo
 	echo
-	echo  -e " ${Green_font_prefix}Chieftain && xyl1gun4eg && Veron${Font_color_suffix} ${Green_font_prefix}[SSpro Control]${Green_font_prefix} "
+	echo  -e " ${Green_font_prefix}Chieftain && xyl1gun4eg && VeroN${Font_color_suffix} ${Green_font_prefix}[SSpro Control]${Green_font_prefix} "
 	echo
-        echo -e "Приветствую, администратор сервера!  Дата: $(date +"%d-%m-%Y")
+        echo -e "Приветствую, администратор сервера!  Дата: $(date +"%d-%m-%Y")"
         echo -e "
   IP сервера: $serverip123
  Ты на сервере ${Green_background_prefix}$domainofserver${Font_color_suffix}
@@ -1574,7 +1541,7 @@ case "$num" in
         ;;
         16)
         Server_IP_Checker
-	     ;;
+	;;
 	*)
 	echo -e "${Error} Введите корректный номер [1-16]"
 	;;
