@@ -1460,16 +1460,16 @@ else
 	clear
 	echo
 	echo
-	echo  -e " ${Green_font_prefix}Chieftain && xyl1gun4eg && VeroN${Font_color_suffix} ${Green_font_prefix}[SSpro Control]${Green_font_prefix} "
+	echo  -e "${Green_font_prefix}Chieftain && xyl1gun4eg && VeroN${Font_color_suffix} ${Green_font_prefix}[SSpro Control]${Green_font_prefix} "
 	echo
         echo -e "Приветствую, администратор сервера!  Дата: $(date +"%d-%m-%Y")"
         echo -e "
  IP сервера: $serverip123
- Ты на сервере ${Green_background_prefix}$domainofserver${Font_color_suffix}
+ Ты на сервере: ${Green_background_prefix}$domainofserver${Font_color_suffix}
 
   ${Green_font_prefix}1.${Font_color_suffix} Создать ключ
   ${Green_font_prefix}2.${Font_color_suffix} Удалить ключ
-  ${Green_font_prefix}3.${Font_color_suffix} Изменить пароль
+  ${Green_font_prefix}3.${Font_color_suffix} Изменить пароль ключа
   ${Green_font_prefix}4.${Font_color_suffix} Информация о клиентах
   ${Green_font_prefix}5.${Font_color_suffix} Изменить адрес сервера
 ————————————
