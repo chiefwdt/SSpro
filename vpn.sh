@@ -1473,11 +1473,11 @@ else
   ${Green_font_prefix}4.${Font_color_suffix} Информация о клиентах
   ${Green_font_prefix}5.${Font_color_suffix} Изменить адрес сервера
 ————————————
-  ${Green_font_prefix}6.${Font_color_suffix} Выгрузить БД
-  ${Green_font_prefix}7.${Font_color_suffix} Загрузить БД
+  ${Green_font_prefix}6.${Font_color_suffix} Выгрузить Базу
+  ${Green_font_prefix}7.${Font_color_suffix} Загрузить Базу
  ————————————
   ${Green_font_prefix}8.${Font_color_suffix} Очистить трафик
-  ${Green_font_prefix}9.${Font_color_suffix} Изменить конфигурацию
+  ${Green_font_prefix}9.${Font_color_suffix} Изменить конфигурацию вручную
 ————————————
  ${Green_font_prefix}10.${Font_color_suffix} Установить Libsodium
  ${Green_font_prefix}11.${Font_color_suffix} Выкл ShadowSocksR
