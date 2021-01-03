@@ -18,8 +18,7 @@ LotServer_file="/appex/bin/serverSpeeder.sh"
 BBR_file="${file}/bbr.sh"
 jq_file="${ssr_folder}/jq"
 
-Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
-Info="${Green_font_prefix}[Информация]${Font_color_suffix}"
+Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m" && Green="\033[32m" && Red="\033[31m" && Yellow="\033[33m" && Blue='\033[34m' && Purple='\033[35m' && Ocean='\033[36m' && Black='\033[37m' && Morg="\033[5m" && Reverse="\033[7m" && Font="\033[1m"Info="${Green_font_prefix}[Информация]${Font_color_suffix}"
 Error="${Red_font_prefix}[Ошибка]${Font_color_suffix}"
 T="${Green_font_prefix}[Заметка]${Font_color_suffix}"
 Separator_1="——————————————————————————————"
@@ -348,14 +347,9 @@ View_User_info(){
 	echo -e " Шифрование : ${Green_font_prefix}${method}${Font_color_suffix}"
 	echo -e " Протокол   : ${Red_font_prefix}${protocol}${Font_color_suffix}"
 	echo -e " Obfs\t    : ${Red_font_prefix}${obfs}${Font_color_suffix}"
-	echo -e " Количество устройств : ${Green_font_prefix}${protocol_param}${Font_color_suffix}"
 	echo -e " Общая скорость ключа : ${Green_font_prefix}${speed_limit_per_con} KB/S${Font_color_suffix}"
-	echo -e " Скорость соединения у каждого пользователя : ${Green_font_prefix}${speed_limit_per_user} KB/S${Font_color_suffix}"
-	echo -e " Запрещенные порты : ${Green_font_prefix}${forbidden_port} ${Font_color_suffix}"
 	echo
 	echo -e " Использованный трафик : Upload: ${Green_font_prefix}${u}${Font_color_suffix} + Download: ${Green_font_prefix}${d}${Font_color_suffix} = ${Green_font_prefix}${transfer_enable_Used_2}${Font_color_suffix}"
-	echo -e " Осталось трафика : ${Green_font_prefix}${transfer_enable_Used} ${Font_color_suffix}"
-	echo -e " Всего трафика : ${Green_font_prefix}${transfer_enable} ${Font_color_suffix}"
 	echo -e "${ss_link}"
 	echo -e "${ssr_link}"
 	echo -e " ${Green_font_prefix} Подсказка: ${Font_color_suffix}
@@ -1399,8 +1393,20 @@ Stop_SSR(){
 	[[ -z ${PID} ]] && echo -e "${Error} ShadowsocksR не запущен !" && exit 1
 	/etc/init.d/ssrmu stop
 }
+OpenVPN(){
+   bash /root/PrivateScript/ovpn.sh
+}
 Server_IP_Checker(){
 	 echo -e "IP данного сервера = $(curl "ifconfig.me") " && echo
+}
+View_Log(){
+	SSR_installation_status
+	[[ ! -e ${ssr_log_file} ]] && echo -e "${Error} Лог ShadowsocksR не существует !" && exit 1
+	echo && echo -e "${Tip} Нажмите ${Red_font_prefix}Ctrl+C${Font_color_suffix} для остановки просмотра лога" && echo -e "Если вам нужен полный лог, то напишите ${Red_font_prefix}cat ${ssr_log_file}${Font_color_suffix} 。" && echo
+	tail -f ${ssr_log_file}
+}
+Fastexit(){
+	exit
 }
 Restart_SSR(){
 	SSR_installation_status
@@ -1466,30 +1472,39 @@ else
         echo -e "
  IP сервера: $serverip123
  Ты на сервере: ${Green_background_prefix}$domainofserver${Font_color_suffix}
+ Сейчас на сервере $List_port_user
 
-  ${Green_font_prefix}1.${Font_color_suffix} Создать ключ
-  ${Green_font_prefix}2.${Font_color_suffix} Удалить ключ
-  ${Green_font_prefix}3.${Font_color_suffix} Изменить пароль ключа
-  ${Green_font_prefix}4.${Font_color_suffix} Информация о клиентах
-  ${Green_font_prefix}5.${Font_color_suffix} Изменить адрес сервера
-————————————
-  ${Green_font_prefix}6.${Font_color_suffix} Выгрузить Базу
-  ${Green_font_prefix}7.${Font_color_suffix} Загрузить Базу
- ————————————
-  ${Green_font_prefix}8.${Font_color_suffix} Очистить трафик
-  ${Green_font_prefix}9.${Font_color_suffix} Изменить конфигурацию вручную
-————————————
- ${Green_font_prefix}10.${Font_color_suffix} Вкл ShadowSocksR
- ${Green_font_prefix}11.${Font_color_suffix} Выкл ShadowSocksR
- ${Green_font_prefix}12.${Font_color_suffix} Перезапустить ShadowSocksR
- ${Green_font_prefix}13.${Font_color_suffix} Установить Libsodium
- ${Green_font_prefix}14.${Font_color_suffix} Установить ShadowSocksR
- ${Green_font_prefix}15.${Font_color_suffix} Удалить ShadowSocksR
-————————————
+|${Yellow}——————————————————————————————————————————————${Font_color_suffix}|
+| ${Green_font_prefix}0.${Font_color_suffix} ${Yellow}Выход${Font_color_suffix}                                     |
+|${Red_font_prefix}————————————${Font_color_suffix} Создание / Удаление ${Red_font_prefix}—————————————${Font_color_suffix}|
+|${Green_font_prefix}1.${Font_color_suffix} ${Green}Создать ключ${Font_color_suffix}                               |
+|${Green_font_prefix}2.${Font_color_suffix} ${Green}Удалить ключ${Font_color_suffix}                               |
+|${Green_font_prefix}3.${Font_color_suffix} ${Red}Изменить пароль ключа${Font_color_suffix}                      |
+|${Green_font_prefix}4.${Font_color_suffix} ${Yellow}Информация о клиентах${Font_color_suffix}                      |
+|${Green_font_prefix}5.${Font_color_suffix} ${Yellow}Показать подключенные IP-адреса${Font_color_suffix}            |
+|${Green_font_prefix}——————————————${Font_color_suffix} Управление базой ${Green_font_prefix}——————————————${Font_color_suffix}|
+|${Green_font_prefix}6.${Font_color_suffix} ${Green}Выгрузить Базу${Font_color_suffix}                             |
+|${Green_font_prefix}7.${Font_color_suffix} ${Green}Загрузить Базу${Font_color_suffix}                             |
+|${Green_font_prefix}8.${Font_color_suffix} ${Green}Редактирование Базы${Font_color_suffix}                        |
+|${Red}—————————————${Font_color_suffix} Управление скриптом ${Red}————————————${Font_color_suffix}|
+|${Green_font_prefix}9.${Font_color_suffix} ${Yellow}Изменить адрес сервера${Font_color_suffix}                     |
+|${Green_font_prefix}10.${Font_color_suffix} ${Yellow}Очистка трафика пользователей${Font_color_suffix}             |
+|${Green_font_prefix}11.${Font_color_suffix} ${Red}Включить Shadowsocks${Font_color_suffix}                      |
+|${Green_font_prefix}12.${Font_color_suffix} ${Red}Выключить Shadowsocks${Font_color_suffix}                     |
+|${Green_font_prefix}13.${Font_color_suffix} ${Red}Перезапустить Shadowsocks${Font_color_suffix}                 |
+|${Red}—————————————${Font_color_suffix} Установка скрипта ${Red}——————————————${Font_color_suffix}|
+|${Green_font_prefix}14.${Font_color_suffix} ${Red}Установить Libsodium${Font_color_suffix}                      |
+|${Green_font_prefix}15.${Font_color_suffix} ${Red}Установить Shadowsocks${Font_color_suffix}                    |
+|${Green_font_prefix}16.${Font_color_suffix} ${Red}Удалить Shadowsocks${Font_color_suffix}                       |
+|${Yellow}——————————————————————————————————————————————${Font_color_suffix}|
  "
+
 	menu_status
-	echo && read -e -p "Введите корректный номер [1-15]：" num
+	echo && read -e -p "Введите корректный номер [0-16]：" num
 case "$num" in
+	0)
+	Fastexit
+	;;
 	1)
 	Add_port_user
 	;;
@@ -1497,49 +1512,52 @@ case "$num" in
 	Del_port_user
 	;;
 	3)
-	Modify_port
+  Modify_port
 	Set_config_password
 	Modify_config_password
 	;;
 	4)
-	View_User
+  View_User
 	;;
 	5)
-	Set_user_api_server_pub_addr "Modify"
-	Modify_user_api_server_pub_addr
+	View_user_connection_info
 	;;
 	6)
-	Upload_DB
+  Upload_DB
 	;;
 	7)
 	Download_DB
 	;;
 	8)
-	Clear_transfer
+	Set_user_api_server_pub_addr "Modify"
+	Modify_user_api_server_pub_addr
 	;;
 	9)
 	Manually_Modify_Config
 	;;
 	10)
-	Start_SSR
+	Clear_transfer
 	;;
 	11)
-	Stop_SSR
+	Start_SSR
 	;;
 	12)
-	Restart_SSR
+	Stop_SSR
 	;;
 	13)
-	Install_Libsodium
+	Restart_SSR
 	;;
 	14)
+	Install_Libsodium
+	;;
+	15)
 	Install_SSR
-        ;;
-        15)
+	;;
+	16)
 	Uninstall_SSR
-        ;;
+	;;
 	*)
-	echo -e "${Error} Введите корректный номер [1-15]"
+	echo -e "${Error} Введите корректный номер [0-16]"
 	;;
 esac
 fi
