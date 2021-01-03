@@ -854,6 +854,7 @@ Installation_dependency(){
 }
 Install_SSR(){
 	check_root
+        apt-get update -y && apt install git -y && apt install curl -y && apt install net-tools -y && apt install iptables -y
 	[[ -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR уже установлен !" && exit 1
 	echo -e "${Info} типа че то происходит..."
 	Set_user_api_server_pub_addr
@@ -877,6 +878,34 @@ Install_SSR(){
 	echo -e "${Info} типа че то происходит..."
 	Start_SSR
 	Get_User_info "${ssr_port}"
+        Check_Libsodium_ver
+	if [[ ${release} == "centos" ]]; then
+		yum update
+		echo -e "${Info} бла бла бла..."
+		yum -y groupinstall "Development Tools"
+		echo -e "${Info} скачивание..."
+		#https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
+		wget  --no-check-certificate -N "https://github.com/jedisct1/libsodium/releases/download/${Libsodiumr_ver}-RELEASE/libsodium-${Libsodiumr_ver}.tar.gz"
+		echo -e "${Info} распаковка..."
+		tar -xzf libsodium-${Libsodiumr_ver}.tar.gz && cd libsodium-${Libsodiumr_ver}
+		echo -e "${Info} установка..."
+		./configure --disable-maintainer-mode && make -j2 && make install
+		echo /usr/local/lib > /etc/ld.so.conf.d/usr_local_lib.conf
+	else
+		apt-get update
+		echo -e "${Info} бла бла бла..."
+		apt-get install -y build-essential
+		echo -e "${Info} скачивание..."
+		wget  --no-check-certificate -N "https://github.com/jedisct1/libsodium/releases/download/${Libsodiumr_ver}-RELEASE/libsodium-${Libsodiumr_ver}.tar.gz"
+		echo -e "${Info} распаковка..."
+		tar -xzf libsodium-${Libsodiumr_ver}.tar.gz && cd libsodium-${Libsodiumr_ver}
+		echo -e "${Info} установка..."
+		./configure --disable-maintainer-mode && make -j2 && make install
+	fi
+	ldconfig
+	cd .. && rm -rf libsodium-${Libsodiumr_ver}.tar.gz && rm -rf libsodium-${Libsodiumr_ver}
+	[[ ! -e ${Libsodiumr_file} ]] && echo -e "${Error} Установка libsodium неуспешна !" && exit 1
+	echo && echo -e "${Info} libsodium успешно установлен !" && echo
 	View_User_info
 }
 Update_SSR(){
