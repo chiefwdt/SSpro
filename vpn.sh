@@ -1464,7 +1464,7 @@ else
 	echo
         echo -e "Приветствую, администратор сервера!  Дата: $(date +"%d-%m-%Y")"
         echo -e "
-  IP сервера: $serverip123
+ IP сервера: $serverip123
  Ты на сервере ${Green_background_prefix}$domainofserver${Font_color_suffix}
 
   ${Green_font_prefix}1.${Font_color_suffix} Создать ключ
@@ -1485,11 +1485,10 @@ else
  ${Green_font_prefix}13.${Font_color_suffix} Перезапустить ShadowsocksR
  ${Green_font_prefix}14.${Font_color_suffix} Установить ShadowSocksR
  ${Green_font_prefix}15.${Font_color_suffix} Удалить ShadowSocksR
- ${Green_font_prefix}16.${Font_color_suffix} Просмотреть ip сервера
 ————————————
  "
 	menu_status
-	echo && read -e -p "Введите корректный номер [1-16]：" num
+	echo && read -e -p "Введите корректный номер [1-15]：" num
 case "$num" in
 	1)
 	Add_port_user
@@ -1539,11 +1538,8 @@ case "$num" in
         15)
 	Uninstall_SSR
         ;;
-        16)
-        Server_IP_Checker
-	;;
 	*)
-	echo -e "${Error} Введите корректный номер [1-16]"
+	echo -e "${Error} Введите корректный номер [1-15]"
 	;;
 esac
 fi
