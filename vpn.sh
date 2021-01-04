@@ -344,16 +344,9 @@ View_User_info(){
 	echo -e " IP\t    : ${Green_font_prefix}${ip}${Font_color_suffix}"
 	echo -e " Порт\t    : ${Green_font_prefix}${port}${Font_color_suffix}"
 	echo -e " Пароль\t    : ${Green_font_prefix}${password}${Font_color_suffix}"
-	echo -e " Шифрование : ${Green_font_prefix}${method}${Font_color_suffix}"
-	echo -e " Протокол   : ${Red_font_prefix}${protocol}${Font_color_suffix}"
-	echo -e " Obfs\t    : ${Red_font_prefix}${obfs}${Font_color_suffix}"
-	echo -e " Общая скорость ключа : ${Green_font_prefix}${speed_limit_per_con} KB/S${Font_color_suffix}"
 	echo
 	echo -e " Использованный трафик : Upload: ${Green_font_prefix}${u}${Font_color_suffix} + Download: ${Green_font_prefix}${d}${Font_color_suffix} = ${Green_font_prefix}${transfer_enable_Used_2}${Font_color_suffix}"
 	echo -e "${ss_link}"
-	echo -e "${ssr_link}"
-	echo -e " ${Green_font_prefix} Подсказка: ${Font_color_suffix}
- Откройте ссылку в браузере для получения QR кода。"
 	echo && echo "==================================================="
 }
 # Создание юзера
@@ -854,7 +847,7 @@ Installation_dependency(){
 }
 Install_SSR(){
 	check_root
-        apt-get update -y && apt install git -y && apt install curl -y && apt install net-tools -y && apt install iptables -y && apt install sudo -y
+        apt-get update -y && apt install git -y && apt install curl -y && apt install net-tools -y && apt install iptables -y
 	[[ -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR уже установлен !" && exit 1
 	echo -e "${Info} типа че то происходит..."
 	Set_user_api_server_pub_addr
@@ -1452,6 +1445,8 @@ elif [[ "${action}" == "monitor" ]]; then
 else
         domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
         serverip123=$(curl ifconfig.me)
+        user_info=$(python "/usr/local/shadowsocksr/mujson_mgr.py" -l)
+		user_total=$(echo "${user_info}"|wc -l)
 	clear
 	echo
 	echo
@@ -1461,7 +1456,7 @@ else
         echo -e "
  IP сервера: $serverip123
  Ты на сервере: ${Green_background_prefix}$domainofserver${Font_color_suffix}
-
+ Клиентов на сервере: $user_total
 ${Ocean}|————————————————————————————————————|${Font_color_suffix}
 |${Ocean}0.${Font_color_suffix} ${Yellow}Выход${Font_color_suffix}                            |
 |${Ocean}————————${Font_color_suffix} Создание / Удаление ${Ocean}———————${Font_color_suffix}|
@@ -1487,7 +1482,7 @@ ${Ocean}|———————————————————————�
  "
 
 	menu_status
-	echo && read -e -p "Введите корректный номер [0-15]：" num
+	echo && read -e -p "Введите корректный номер [0-16]：" num
 case "$num" in
 	0)
 	Fastexit
@@ -1516,11 +1511,11 @@ case "$num" in
 	Download_DB
 	;;
 	8)
-	Manually_Modify_Config
-	;;
-	9)
 	Set_user_api_server_pub_addr "Modify"
 	Modify_user_api_server_pub_addr
+	;;
+	9)
+	Manually_Modify_Config
 	;;
 	10)
 	Clear_transfer
@@ -1541,7 +1536,7 @@ case "$num" in
 	Uninstall_SSR
 	;;
 	*)
-	echo -e "${Error} Введите корректный номер [0-15]"
+	echo -e "${Error} Введите корректный номер [0-16]"
 	;;
 esac
 fi
