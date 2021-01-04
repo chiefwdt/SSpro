@@ -1487,7 +1487,7 @@ ${Ocean}|———————————————————————�
  "
 
 	menu_status
-	echo && read -e -p "Введите корректный номер [0-16]：" num
+	echo && read -e -p "Введите корректный номер [0-15]：" num
 case "$num" in
 	0)
 	Fastexit
@@ -1516,11 +1516,11 @@ case "$num" in
 	Download_DB
 	;;
 	8)
-	Set_user_api_server_pub_addr "Modify"
-	Modify_user_api_server_pub_addr
+	Manually_Modify_Config
 	;;
 	9)
-	Manually_Modify_Config
+	Set_user_api_server_pub_addr "Modify"
+	Modify_user_api_server_pub_addr
 	;;
 	10)
 	Clear_transfer
@@ -1541,7 +1541,7 @@ case "$num" in
 	Uninstall_SSR
 	;;
 	*)
-	echo -e "${Error} Введите корректный номер [0-16]"
+	echo -e "${Error} Введите корректный номер [0-15]"
 	;;
 esac
 fi
