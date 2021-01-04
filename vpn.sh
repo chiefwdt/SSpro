@@ -954,46 +954,6 @@ Check_Libsodium_ver(){
 	[[ -z ${Libsodiumr_ver} ]] && Libsodiumr_ver=${Libsodiumr_ver_backup}
 	echo -e "${Info} Последняя версия libsodium: ${Green_font_prefix}${Libsodiumr_ver}${Font_color_suffix} !"
 }
-Install_Libsodium(){
-	if [[ -e ${Libsodiumr_file} ]]; then
-		echo -e "${Error} libsodium уже установлен, желаете перезаписать(обновить)？[y/N]"
-		read -e -p "(По умолчанию: n):" yn
-		[[ -z ${yn} ]] && yn="n"
-		if [[ ${yn} == [Nn] ]]; then
-			echo "Отмена..." && exit 1
-		fi
-	else
-		echo -e "${Info} libsodium не установлен, начинаю установку..."
-	fi
-	Check_Libsodium_ver
-	if [[ ${release} == "centos" ]]; then
-		yum update
-		echo -e "${Info} бла бла бла..."
-		yum -y groupinstall "Development Tools"
-		echo -e "${Info} скачивание..."
-		#https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
-		wget  --no-check-certificate -N "https://github.com/jedisct1/libsodium/releases/download/${Libsodiumr_ver}-RELEASE/libsodium-${Libsodiumr_ver}.tar.gz"
-		echo -e "${Info} распаковка..."
-		tar -xzf libsodium-${Libsodiumr_ver}.tar.gz && cd libsodium-${Libsodiumr_ver}
-		echo -e "${Info} установка..."
-		./configure --disable-maintainer-mode && make -j2 && make install
-		echo /usr/local/lib > /etc/ld.so.conf.d/usr_local_lib.conf
-	else
-		apt-get update
-		echo -e "${Info} бла бла бла..."
-		apt-get install -y build-essential
-		echo -e "${Info} скачивание..."
-		wget  --no-check-certificate -N "https://github.com/jedisct1/libsodium/releases/download/${Libsodiumr_ver}-RELEASE/libsodium-${Libsodiumr_ver}.tar.gz"
-		echo -e "${Info} распаковка..."
-		tar -xzf libsodium-${Libsodiumr_ver}.tar.gz && cd libsodium-${Libsodiumr_ver}
-		echo -e "${Info} установка..."
-		./configure --disable-maintainer-mode && make -j2 && make install
-	fi
-	ldconfig
-	cd .. && rm -rf libsodium-${Libsodiumr_ver}.tar.gz && rm -rf libsodium-${Libsodiumr_ver}
-	[[ ! -e ${Libsodiumr_file} ]] && echo -e "${Error} Установка libsodium неуспешна !" && exit 1
-	echo && echo -e "${Info} libsodium успешно установлен !" && echo
-}
 # 显示 连接信息
 debian_View_user_connection_info(){
 	format_1=$1
@@ -1495,37 +1455,35 @@ else
 	clear
 	echo
 	echo
-	echo  -e "${Green_font_prefix}Chieftain && xyl1gun4eg && VeroN${Font_color_suffix} ${Green_font_prefix}[SSpro Control]${Green_font_prefix} "
+	echo  -e "${Yellow}Chieftain && xyl1gun4eg && VeroN [SSpro Control]${Font_color_suffix} "
 	echo
         echo -e "Приветствую, администратор сервера!  Дата: $(date +"%d-%m-%Y")"
         echo -e "
  IP сервера: $serverip123
  Ты на сервере: ${Green_background_prefix}$domainofserver${Font_color_suffix}
- Сейчас на сервере $List_port_user
 
-|${Yellow}——————————————————————————————————————————————${Font_color_suffix}|
-| ${Green_font_prefix}0.${Font_color_suffix} ${Yellow}Выход${Font_color_suffix}                                     |
-|${Red_font_prefix}————————————${Font_color_suffix} Создание / Удаление ${Red_font_prefix}—————————————${Font_color_suffix}|
-|${Green_font_prefix}1.${Font_color_suffix} ${Green}Создать ключ${Font_color_suffix}                               |
-|${Green_font_prefix}2.${Font_color_suffix} ${Green}Удалить ключ${Font_color_suffix}                               |
-|${Green_font_prefix}3.${Font_color_suffix} ${Red}Изменить пароль ключа${Font_color_suffix}                      |
-|${Green_font_prefix}4.${Font_color_suffix} ${Yellow}Информация о клиентах${Font_color_suffix}                      |
-|${Green_font_prefix}5.${Font_color_suffix} ${Yellow}Показать подключенные IP-адреса${Font_color_suffix}            |
-|${Green_font_prefix}——————————————${Font_color_suffix} Управление базой ${Green_font_prefix}——————————————${Font_color_suffix}|
-|${Green_font_prefix}6.${Font_color_suffix} ${Green}Выгрузить Базу${Font_color_suffix}                             |
-|${Green_font_prefix}7.${Font_color_suffix} ${Green}Загрузить Базу${Font_color_suffix}                             |
-|${Green_font_prefix}8.${Font_color_suffix} ${Green}Редактирование Базы${Font_color_suffix}                        |
-|${Red}—————————————${Font_color_suffix} Управление скриптом ${Red}————————————${Font_color_suffix}|
-|${Green_font_prefix}9.${Font_color_suffix} ${Yellow}Изменить адрес сервера${Font_color_suffix}                     |
-|${Green_font_prefix}10.${Font_color_suffix} ${Yellow}Очистка трафика пользователей${Font_color_suffix}             |
-|${Green_font_prefix}11.${Font_color_suffix} ${Red}Включить Shadowsocks${Font_color_suffix}                      |
-|${Green_font_prefix}12.${Font_color_suffix} ${Red}Выключить Shadowsocks${Font_color_suffix}                     |
-|${Green_font_prefix}13.${Font_color_suffix} ${Red}Перезапустить Shadowsocks${Font_color_suffix}                 |
-|${Red}—————————————${Font_color_suffix} Установка скрипта ${Red}——————————————${Font_color_suffix}|
-|${Green_font_prefix}14.${Font_color_suffix} ${Red}Установить Libsodium${Font_color_suffix}                      |
-|${Green_font_prefix}15.${Font_color_suffix} ${Red}Установить Shadowsocks${Font_color_suffix}                    |
-|${Green_font_prefix}16.${Font_color_suffix} ${Red}Удалить Shadowsocks${Font_color_suffix}                       |
-|${Yellow}——————————————————————————————————————————————${Font_color_suffix}|
+${Ocean}|————————————————————————————————————|${Font_color_suffix}
+|${Ocean}0.${Font_color_suffix} ${Yellow}Выход${Font_color_suffix}                            |
+|${Ocean}————————${Font_color_suffix} Создание / Удаление ${Ocean}———————${Font_color_suffix}|
+|${Ocean}1.${Font_color_suffix} ${Yellow}Создать ключ${Font_color_suffix}                     |
+|${Ocean}2.${Font_color_suffix} ${Yellow}Удалить ключ${Font_color_suffix}                     |
+|${Ocean}3.${Font_color_suffix} ${Yellow}Изменить пароль ключа${Font_color_suffix}            |
+|${Ocean}4.${Font_color_suffix} ${Yellow}Информация о клиентах${Font_color_suffix}            |
+|${Ocean}5.${Font_color_suffix} ${Yellow}Показать подключенные IP-адреса${Font_color_suffix}  |
+|${Ocean}————————${Font_color_suffix} Управление базой ${Ocean}——————————${Font_color_suffix}|
+|${Ocean}6.${Font_color_suffix} ${Yellow}Выгрузить Базу${Font_color_suffix}                   |
+|${Ocean}7.${Font_color_suffix} ${Yellow}Загрузить Базу${Font_color_suffix}                   |
+|${Ocean}8.${Font_color_suffix} ${Yellow}Редактирование Базы${Font_color_suffix}              |
+|${Ocean}9.${Font_color_suffix} ${Yellow}Изменить адрес сервера${Font_color_suffix}           |
+|${Ocean}————————${Font_color_suffix} Управление скриптом ${Ocean}———————${Font_color_suffix}|
+|${Ocean}10.${Font_color_suffix} ${Yellow}Очистка трафика пользователей${Font_color_suffix}   |
+|${Ocean}11.${Font_color_suffix} ${Yellow}Включить Shadowsocks${Font_color_suffix}            |
+|${Ocean}12.${Font_color_suffix} ${Yellow}Выключить Shadowsocks${Font_color_suffix}           |
+|${Ocean}13.${Font_color_suffix} ${Yellow}Перезапустить Shadowsocks${Font_color_suffix}       |
+|${Ocean}————————${Font_color_suffix} Установка скрипта ${Ocean}—————————${Font_color_suffix}|
+|${Ocean}14.${Font_color_suffix} ${Yellow}Установить Shadowsocks${Font_color_suffix}          |
+|${Ocean}15.${Font_color_suffix} ${Yellow}Удалить Shadowsocks${Font_color_suffix}             |
+${Ocean}|————————————————————————————————————|${Font_color_suffix}
  "
 
 	menu_status
@@ -1577,12 +1535,9 @@ case "$num" in
 	Restart_SSR
 	;;
 	14)
-	Install_Libsodium
-	;;
-	15)
 	Install_SSR
 	;;
-	16)
+	15)
 	Uninstall_SSR
 	;;
 	*)
