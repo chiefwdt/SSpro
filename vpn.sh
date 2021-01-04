@@ -854,7 +854,7 @@ Installation_dependency(){
 }
 Install_SSR(){
 	check_root
-        apt-get update -y && apt install git -y && apt install curl -y && apt install net-tools -y && apt install iptables -y
+        apt-get update -y && apt install git -y && apt install curl -y && apt install net-tools -y && apt install iptables -y && apt install sudo -y
 	[[ -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR уже установлен !" && exit 1
 	echo -e "${Info} типа че то происходит..."
 	Set_user_api_server_pub_addr
