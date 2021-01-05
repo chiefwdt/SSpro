@@ -1411,17 +1411,16 @@ menu_status(){
 	fi
 }
 Upload_DB(){
-	echo -e "${Green_font_prefix}Перед вам выйдет строка с ссылкой на файлообменник, откуда вы сможете скачать базу данных. 
-	Пример строки:{'success':'true','key':**********,'link':https://file.io/***********,'expiry':14 days} 
-	Введите строку из поля 'link' в браузере, и ваша база данных будет скачана. ${Font_color_suffix}"
-	curl -F "file=@/usr/local/shadowsocksr/mudb.json" "https://file.io" && echo -e "${Green_font_prefix}Закрытие скрипта...${Font_color_suffix}"
+ 	upload_link="$(curl -F "file=@/usr/local/shadowsocksr/mudb.json" "https://file.io" | cut -b 46-73)" && clear
+	echo -e "${Red} $upload_link${Font_color_suffix} - ${Green}Ссылка на скачивание Базы ShadowSocks
+ База ShadowSocks успешно выгружена!"${Font_color_suffix}
 }
 Download_DB(){
-	echo -e "${Green_font_prefix} Внимание: это приведет к перезаписи всей базы пользователей, вы уверены что хотите продолжить?${Font_color_suffix}(y/n)"
+	echo -e "${Green}Загрузить Базу по ссылке?${Font_color_suffix}${Red} ВНИМАНИЕ: ПРОДОЛЖЕНИЕ ПРИВЕДЕТ К ПЕРЕЗАПИСИ УСТАНОВЛЕННОЙ БАЗЫ!${Font_color_suffix}${Green}(y/n)"
 	read -e -p "(По умолчанию: отмена):" base_override
-	[[ -z "${base_override}" ]] && echo "Отмена..." && exit 1
+	[[ -z "${base_override}" ]] && echo "Отмена...${Font_color_suffix}" && exit 1
 	if [[ ${base_override} == "y" ]]; then
-		read -e -p "${Green_font_prefix} Введите ссылку на базу: (полученная в 15 пункте):(Если вы ее не сделали, то введите 'n')${Font_color_suffix}" base_link && echo
+		read -e -p "${Green_font_prefix} Введите ссылку на Базу:(Если вы ее не сделали, то введите 'n')${Font_color_suffix}" base_link && echo
 		[[ -z "${base_link}" ]] && echo "Отмена..." && exit 1
 		if [[ ${base_link} == "n" ]]; then
    echo "Отмена..." && exit 1
