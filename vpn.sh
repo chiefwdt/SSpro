@@ -52,7 +52,7 @@ check_crontab(){
 	[[ ! -e "/usr/bin/crontab" ]] && echo -e "${Error} Отсутствует crontab: для установки на CentOS пропишите yum install crond -y , Debian/Ubuntu: apt-get install cron -y !" && exit 1
 }
 SSR_installation_status(){
-	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} Не найден ShadowsocksR!" && exit 1
+	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} Не найден Shadowsocks!" && exit 1
 }
 Server_Speeder_installation_status(){
 	[[ ! -e ${Server_Speeder_file} ]] && echo -e "${Error} Server Speeder не установлен !" && exit 1
@@ -733,7 +733,7 @@ fi' >> "/usr/local/shadowsocksr/${del_user_port}checking.sh"
 			echo -e "\n* * * * * /bin/bash /usr/local/shadowsocksr/${del_user_port}checking.sh" >> "/usr/local/shadowsocksr/crontab.bak"
 		fi
 		crontab "/usr/local/shadowsocksr/crontab.bak"
-		echo -e "При подключении более 1 IP адреса к ключу с портом $del_user_port, пароль будет сменен на случайный."	
+		echo -e "При подключении более 1 IP-адреса к ключу с портом $del_user_port, пароль будет сменен на случайный."
 	else
 		echo -e "${Error} Введите корректный порт !"
 	fi	
@@ -774,40 +774,40 @@ Download_SSR(){
 	#git config --global http.sslVerify false
 	#env GIT_SSL_NO_VERIFY=true git clone -b manyuser https://github.com/ToyoDAdoubiBackup/shadowsocksr.git
 	#[[ ! -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR服务端 下载失败 !" && exit 1
-	[[ ! -e "manyuser.zip" ]] && echo -e "${Error} Не удалось скачать архив с ShadowsocksR !" && rm -rf manyuser.zip && exit 1
+	[[ ! -e "manyuser.zip" ]] && echo -e "${Error} Не удалось скачать архив с Shadowsocks !" && rm -rf manyuser.zip && exit 1
 	unzip "manyuser.zip"
-	[[ ! -e "/usr/local/shadowsocksr-manyuser/" ]] && echo -e "${Error} Ошибка распаковки ShadowsocksR !" && rm -rf manyuser.zip && exit 1
+	[[ ! -e "/usr/local/shadowsocksr-manyuser/" ]] && echo -e "${Error} Ошибка распаковки Shadowsocks !" && rm -rf manyuser.zip && exit 1
 	mv "/usr/local/shadowsocksr-manyuser/" "/usr/local/shadowsocksr/"
-	[[ ! -e "/usr/local/shadowsocksr/" ]] && echo -e "${Error} Переименование ShadowsocksR неуспешно !" && rm -rf manyuser.zip && rm -rf "/usr/local/shadowsocksr-manyuser/" && exit 1
+	[[ ! -e "/usr/local/shadowsocksr/" ]] && echo -e "${Error} Переименование Shadowsocks неуспешно !" && rm -rf manyuser.zip && rm -rf "/usr/local/shadowsocksr-manyuser/" && exit 1
 	rm -rf manyuser.zip
 	cd "shadowsocksr"
 	cp "${ssr_folder}/config.json" "${config_user_file}"
 	cp "${ssr_folder}/mysql.json" "${ssr_folder}/usermysql.json"
 	cp "${ssr_folder}/apiconfig.py" "${config_user_api_file}"
-	[[ ! -e ${config_user_api_file} ]] && echo -e "${Error} Не удалось скопировать apiconfig.py для ShadowsocksR !" && exit 1
+	[[ ! -e ${config_user_api_file} ]] && echo -e "${Error} Не удалось скопировать apiconfig.py для Shadowsocks !" && exit 1
 	sed -i "s/API_INTERFACE = 'sspanelv2'/API_INTERFACE = 'mudbjson'/" ${config_user_api_file}
 	server_pub_addr="127.0.0.1"
 	Modify_user_api_server_pub_addr
 	#sed -i "s/SERVER_PUB_ADDR = '127.0.0.1'/SERVER_PUB_ADDR = '${ip}'/" ${config_user_api_file}
 	sed -i 's/ \/\/ only works under multi-user mode//g' "${config_user_file}"
-	echo -e "${Info} ShadowsocksR успешно установлен !"
+	echo -e "${Info} Shadowsocks успешно установлен !"
 }
 Service_SSR(){
 	if [[ ${release} = "centos" ]]; then
 		if ! wget --no-check-certificate https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/service/ssrmu_centos -O /etc/init.d/ssrmu; then
-			echo -e "${Error} Не удалось загрузить скрипт для управления ShadowsocksR !" && exit 1
+			echo -e "${Error} Не удалось загрузить скрипт для управления Shadowsocks !" && exit 1
 		fi
 		chmod +x /etc/init.d/ssrmu
 		chkconfig --add ssrmu
 		chkconfig ssrmu on
 	else
 		if ! wget --no-check-certificate https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/service/ssrmu_debian -O /etc/init.d/ssrmu; then
-			echo -e "${Error} Не удалось загрузить скрипт для управления ShadowsocksR !" && exit 1
+			echo -e "${Error} Не удалось загрузить скрипт для управления Shadowsocks !" && exit 1
 		fi
 		chmod +x /etc/init.d/ssrmu
 		update-rc.d -f ssrmu defaults
 	fi
-	echo -e "${Info} Скрипт для управления ShadowsocksR успешно установлен !"
+	echo -e "${Info} Скрипт для управления Shadowsocks успешно установлен !"
 }
 # 安装 JQ解析器
 JQ_install(){
@@ -838,7 +838,7 @@ Installation_dependency(){
 	Check_python
 	#echo "nameserver 8.8.8.8" > /etc/resolv.conf
 	#echo "nameserver 8.8.4.4" >> /etc/resolv.conf
-	\cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+	\cp -f /usr/share/zoneinfo/Asia/Ashgabat /etc/localtime
 	if [[ ${release} == "centos" ]]; then
 		/etc/init.d/crond restart
 	else
@@ -848,7 +848,7 @@ Installation_dependency(){
 Install_SSR(){
 	check_root
         apt-get update -y && apt install git -y && apt install curl -y && apt install net-tools -y && apt install iptables -y && apt install sudo -y
-	[[ -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR уже установлен !" && exit 1
+	[[ -e ${ssr_folder} ]] && echo -e "${Error} Shadowsocks уже установлен !" && exit 1
 	echo -e "${Info} типа че то происходит..."
 	Set_user_api_server_pub_addr
 	Set_config_all
@@ -903,14 +903,14 @@ Install_SSR(){
 }
 Update_SSR(){
 	SSR_installation_status
-	echo -e "Данная функция отключена."
+	echo -e "Данная функция отключена"
 	#cd ${ssr_folder}
 	#git pull
 	#Restart_SSR
 }
 Uninstall_SSR(){
-	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR не установлен !" && exit 1
-	echo "Удалить ShadowsocksR？[y/N]" && echo
+	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} Shadowsocks не установлен !" && exit 1
+	echo "Удалить Shadowsocks？[y/N]" && echo
 	read -e -p "(По умолчанию: n):" unyn
 	[[ -z ${unyn} ]] && unyn="n"
 	if [[ ${unyn} == [Yy] ]]; then
@@ -936,7 +936,7 @@ Uninstall_SSR(){
 			update-rc.d -f ssrmu remove
 		fi
 		rm -rf ${ssr_folder} && rm -rf /etc/init.d/ssrmu
-		echo && echo " ShadowsocksR успешно удален !" && echo
+		echo && echo " Shadowsocks успешно удален !" && echo
 	else
 		echo && echo " Отмена..." && echo
 	fi
@@ -1241,7 +1241,7 @@ Del_port_user(){
 Manually_Modify_Config(){
 	SSR_installation_status
 	nano ${config_user_mudb_file}
-	echo "Перезапустить ShadowsocksR？[Y/n]" && echo
+	echo "Перезапустить Shadowsocks？[Y/n]" && echo
 	read -e -p "(По умолчанию: y):" yn
 	[[ -z ${yn} ]] && yn="y"
 	if [[ ${yn} == [Yy] ]]; then
@@ -1366,13 +1366,13 @@ Set_crontab(){
 Start_SSR(){
 	SSR_installation_status
 	check_pid
-	[[ ! -z ${PID} ]] && echo -e "${Error} ShadowsocksR запущен !" && exit 1
+	[[ ! -z ${PID} ]] && echo -e "${Error} Shadowsocks запущен !" && exit 1
 	/etc/init.d/ssrmu start
 }
 Stop_SSR(){
 	SSR_installation_status
 	check_pid
-	[[ -z ${PID} ]] && echo -e "${Error} ShadowsocksR не запущен !" && exit 1
+	[[ -z ${PID} ]] && echo -e "${Error} Shadowsocks не запущен !" && exit 1
 	/etc/init.d/ssrmu stop
 }
 OpenVPN(){
@@ -1383,7 +1383,7 @@ Server_IP_Checker(){
 }
 View_Log(){
 	SSR_installation_status
-	[[ ! -e ${ssr_log_file} ]] && echo -e "${Error} Лог ShadowsocksR не существует !" && exit 1
+	[[ ! -e ${ssr_log_file} ]] && echo -e "${Error} Лог Shadowsocks не существует !" && exit 1
 	echo && echo -e "${Tip} Нажмите ${Red_font_prefix}Ctrl+C${Font_color_suffix} для остановки просмотра лога" && echo -e "Если вам нужен полный лог, то напишите ${Red_font_prefix}cat ${ssr_log_file}${Font_color_suffix} 。" && echo
 	tail -f ${ssr_log_file}
 }
@@ -1446,7 +1446,7 @@ else
         domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
         serverip123=$(curl ifconfig.me)
         user_info=$(python "/usr/local/shadowsocksr/mujson_mgr.py" -l)
-		user_total=$(echo "${user_info}"|wc -l)
+		    user_total=$(echo "${user_info}" | wc -l)
 	clear
 	echo
 	echo
@@ -1482,7 +1482,7 @@ ${Ocean}|———————————————————————�
  "
 
 	menu_status
-	echo && read -e -p "Введите корректный номер [0-16]：" num
+	echo && read -e -p "Введите корректный номер [0-15]：" num
 case "$num" in
 	0)
 	Fastexit
@@ -1536,7 +1536,7 @@ case "$num" in
 	Uninstall_SSR
 	;;
 	*)
-	echo -e "${Error} Введите корректный номер [0-16]"
+	echo -e "${Error} Введите корректный номер [0-15]"
 	;;
 esac
 fi
