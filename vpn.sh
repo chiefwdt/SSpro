@@ -1425,7 +1425,7 @@ else
 	clear
 	echo
 	echo
-	echo  -e "${Yellow}Chieftain && xyl1gun4eg && VeroN [SSpro Control]${Font_color_suffix} "
+	echo  -e "${Red}Chieftain && xyl1gun4eg && VeroN [SSpro Control]${Font_color_suffix} "
 	echo
         echo -e "Приветствую, администратор сервера!  Дата: $(date +"%d-%m-%Y")"
         echo -e "
