@@ -1171,34 +1171,10 @@ Add_port_user(){
 			else
 				Add_iptables
 				Save_iptables
-				setiplimit
 				echo -e "${Info} Пользователь добавлен успешно ${Green_font_prefix}[Пользователь: ${ssr_user} , Порт: ${ssr_port}]${Font_color_suffix} "
 				echo
 				Get_User_info "${ssr_port}"
-				View_User_info
-				read -e -p "Хотите настроить автоудаление пользователя?[Y/n]:" autoyn
-				[[ -z ${autoyn} ]] && autoyn="y"
-				if [[ ${autoyn} == [Yy] ]]; then
-					apt install at
-					sudo systemctl enable --now atd
-					port=${ssr_port}
-					clear
-					echo
-					echo
-					echo
-					echo
-					echo		
-					read -e -p "Введите период удаления в днях:" periodofdel
-					at now +$periodofdel days <<ENDMARKER
-python "/usr/local/shadowsocksr/mujson_mgr.py" -d -p '${ssr_port}'
-ENDMARKER
-					clear
-					echo
-					echo
-					echo
-					echo -e "Пользователь с портом ${Green_font_prefix}$ssr_port${Font_color_suffix} будет удален через $periodofdel дней."
-					break
-				fi					
+				View_User_info				
 				break
 			fi
 		done
