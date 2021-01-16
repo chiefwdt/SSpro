@@ -148,7 +148,7 @@ Get_User_transfer(){
 	#echo "transfer_enable_Used_2_1=${transfer_enable_Used_2_1}"
 	transfer_enable_Used_1=$(echo $((${transfer_enable_1}-${transfer_enable_Used_2_1})))
 	#echo "transfer_enable_Used_1=${transfer_enable_Used_1}"
-	
+
 	if [[ ${transfer_enable_1} -lt 1024 ]]; then
 		transfer_enable="${transfer_enable_1} B"
 	elif [[ ${transfer_enable_1} -lt 1048576 ]]; then
@@ -343,7 +343,7 @@ Set_config_user(){
 Set_config_port(){
 	echo "Порт
 	1. Авто
-	2. Вручную"	
+	2. Вручную"
 	read -e -p "По умолчанию: (1.Авто)" how_to_port
 	[[ -z "${how_to_port}" ]] && how_to_port="1"
 	if [[ ${how_to_port} == "1" ]]; then
@@ -380,7 +380,7 @@ Set_config_port(){
 				echo -e "${Error} Введите корректный порт(1-65535)"
 			fi
 		done
-	else 
+	else
 		echo -e "Порт автоматически сгенерирован."
 		ssr_port=$(shuf -i 1000-9999 -n 1)
 		while true
@@ -409,7 +409,7 @@ Set_config_password(){
 		ssr_password=${ssr_port}
 	elif [[ ${how_to_pass} == "2" ]]; then
 		ssr_password=$(date +%s%N | md5sum | head -c 16)
-	else 
+	else
 		ssr_password=${ssr_port}
 	fi
 	echo && echo ${Separator_1} && echo -e "	Пароль : ${Blue}${ssr_password}${Font_color_suffix}" && echo ${Separator_1} && echo
@@ -771,7 +771,7 @@ JQ_install(){
 		fi
 		[[ ! -e ${jq_file} ]] && echo -e "${Error} Парсер JQ не удалось переименовать !" && exit 1
 		chmod +x ${jq_file}
-		echo -e "${Info} Установка JQ завершена, продолжение..." 
+		echo -e "${Info} Установка JQ завершена, продолжение..."
 	else
 		echo -e "${Info} Парсер JQ успешно установлен..."
 	fi
@@ -1027,7 +1027,7 @@ Modify_Config(){
  ${Blue}12.${Font_color_suffix} Изменить все конфигурации
 ————— Другое —————
  ${Blue}13.${Font_color_suffix} Изменить IP адрес для пользователя
- 
+
  ${Tip} Для изменения имени пользователя или порта используйте ручную модификацию !" && echo
 	read -e -p "(По умолчанию: отмена):" ssr_modify
 	[[ -z "${ssr_modify}" ]] && echo "Отмена..." && exit 1
@@ -1122,7 +1122,7 @@ Add_port_user(){
 				echo -e "${Info} Пользователь добавлен успешно ${Blue}[Пользователь: ${ssr_user} , Порт: ${ssr_port}]${Font_color_suffix} "
 				echo
 				Get_User_info "${ssr_port}"
-				View_User_info				
+				View_User_info
 				break
 			fi
 		done
@@ -1344,14 +1344,14 @@ Download_DB(){
 	read -e -p "(По умолчанию: отмена):" base_override
 	[[ -z "${base_override}" ]] && echo "Отмена...${Font_color_suffix}" && exit 1
 	if [[ ${base_override} == "y" ]]; then
-		read -e -p "${Blue} Введите ссылку на Базу:(Если вы ее не сделали, то введите 'n')" base_link && echo ${Font_color_suffix}
+		read -e -p "${Blue} Введите ссылку на Базу:" base_link && echo ${Font_color_suffix}
 		[[ -z "${base_link}" ]] && echo "Отмена..." && exit 1
 		if [[ ${base_link} == "n" ]]; then
    echo "Отмена..." && exit 1
-else 
+else
    cd /usr/local/shadowsocksr
    rm "/usr/local/shadowsocksr/mudb.json"
-   curl -o "mudb.json" "${base_link}"   
+   curl -o "mudb.json" "${base_link}"
    echo -e "База успешно загружена!"
 fi
 	elif [[ ${base_override} == "n" ]]; then
@@ -1373,14 +1373,13 @@ else
 		    user_total=$(echo "${user_info}" | wc -l)
 	clear
 	echo
-	echo
 	echo  -e " ${Morg}${Blue}Chieftain && xyl1gun4eg && VeroN [SSpro Control]${Font_color_suffix} "
 	echo
-        echo -e " Приветствую, администратор сервера!  Дата: ${Blue}$(date +"%d-%m-%Y")"${Font_color_suffix}
+        echo -e " Приветствую, администратор сервера! Дата: ${Blue}$(date +"%d-%m-%Y")"${Font_color_suffix}
         echo -e "
  IP сервера: ${Blue}$serverip123${Font_color_suffix}
  Ты на сервере: ${Blue}$domainofserver${Font_color_suffix}
- Клиентов на сервере: ${Blue}$user_total
+ Клиентов на сервере: ${Blue}$user_total${Font_color_suffix}
 ${Blue}|————————————————————————————————————|${Font_color_suffix}
 |${Blue}0.${Font_color_suffix} ${Yellow}Выход${Font_color_suffix}                            |
 |${Blue}————————${Font_color_suffix} Создание / Удаление ${Blue}———————${Font_color_suffix}|
