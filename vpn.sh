@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+# !/usr/bin/env bash
+# SSpro by Chieftain && xyl1gun4eg && VeroN
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
