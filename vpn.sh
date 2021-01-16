@@ -13,16 +13,19 @@ config_user_mudb_file="${ssr_folder}/mudb.json"
 ssr_log_file="${ssr_folder}/ssserver.log"
 Libsodiumr_file="/usr/local/lib/libsodium.so"
 Libsodiumr_ver_backup="1.0.15"
+Server_Speeder_file="/serverspeeder/bin/serverSpeeder.sh"
+LotServer_file="/appex/bin/serverSpeeder.sh"
+BBR_file="${file}/bbr.sh"
 jq_file="${ssr_folder}/jq"
 
-Blue="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m" && Green="\033[32m" && Red="\033[31m" && Yellow="\033[33m" && Blue='\033[34m' && Purple='\033[35m' && Blue='\033[36m' && Black='\033[37m' && Morg="\033[5m" && Reverse="\033[7m" && Font="\033[1m"Info="${Blue}[Информация]${Font_color_suffix}"
+Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m" && Green="\033[32m" && Red="\033[31m" && Yellow="\033[33m" && Blue='\033[34m' && Purple='\033[35m' && Ocean='\033[36m' && Black='\033[37m' && Morg="\033[5m" && Reverse="\033[7m" && Font="\033[1m"Info="${Green_font_prefix}[Информация]${Font_color_suffix}"
 Error="${Red_font_prefix}[Ошибка]${Font_color_suffix}"
-T="${Blue}[Заметка]${Font_color_suffix}"
+T="${Green_font_prefix}[Заметка]${Font_color_suffix}"
 Separator_1="——————————————————————————————"
 
 
 check_root(){
-	[[ $EUID != 0 ]] && echo -e "${Error} Скрипт не запущен от root. Пропишите ${Blue} sudo su ${Font_color_suffix} И перезапустите программу." && exit 1
+	[[ $EUID != 0 ]] && echo -e "${Error} Скрипт не запущен от root. Пропишите ${Green_background_prefix} sudo su ${Font_color_suffix} И перезапустите программу." && exit 1
 }
 check_sys(){
 	if [[ -f /etc/redhat-release ]]; then
@@ -49,7 +52,25 @@ check_crontab(){
 	[[ ! -e "/usr/bin/crontab" ]] && echo -e "${Error} Отсутствует crontab: для установки на CentOS пропишите yum install crond -y , Debian/Ubuntu: apt-get install cron -y !" && exit 1
 }
 SSR_installation_status(){
-	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} Не найден ShadowsocksR!" && exit 1
+	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} Не найден Shadowsocks!" && exit 1
+}
+Server_Speeder_installation_status(){
+	[[ ! -e ${Server_Speeder_file} ]] && echo -e "${Error} Server Speeder не установлен !" && exit 1
+}
+LotServer_installation_status(){
+	[[ ! -e ${LotServer_file} ]] && echo -e "${Error} LotServer не установлен !" && exit 1
+}
+BBR_installation_status(){
+	if [[ ! -e ${BBR_file} ]]; then
+		echo -e "${Error} BBR не найден, начинаем скачивание..."
+		cd "${file}"
+		if ! wget -N --no-check-certificate https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/bbr.sh; then
+			echo -e "${Error} Загрузка BBR прошла неуспешно !" && exit 1
+		else
+			echo -e "${Info} BBR успешно загружен !"
+			chmod +x bbr.sh
+		fi
+	fi
 }
 # 设置 防火墙规则
 Add_iptables(){
@@ -108,7 +129,7 @@ Get_User_info(){
 	user_info_get=$(python mujson_mgr.py -l -p "${Get_user_port}")
 	match_info=$(echo "${user_info_get}"|grep -w "### user ")
 	if [[ -z "${match_info}" ]]; then
-		echo -e "${Error} Не удалось получить информацию о пользователе ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
+		echo -e "${Error} Не удалось получить информацию о пользователе ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
 	fi
 	user_name=$(echo "${user_info_get}"|grep -w "user :"|awk -F "user : " '{print $NF}')
 	port=$(echo "${user_info_get}"|grep -w "port :"|sed 's/[[:space:]]//g'|awk -F ":" '{print $NF}')
@@ -249,7 +270,52 @@ urlsafe_base64(){
 	date=$(echo -n "$1"|base64|sed ':a;N;s/\n/ /g;ta'|sed 's/ //g;s/=//g;s/+/-/g;s/\//_/g')
 	echo -e "${date}"
 }
-
+ss_link_qr(){
+	SSbase64=$(urlsafe_base64 "${method}:${password}@${ip}:${port}")
+	SSurl="ss://${SSbase64}"
+	SSQRcode="https://api.qrserver.com/v1/create-qr-code/?data=${SSurl}"
+	ss_link=" SS link : ${Green_font_prefix}${SSurl}${Font_color_suffix} \n SS QR код : ${Green_font_prefix}${SSQRcode}${Font_color_suffix}"
+}
+ssr_link_qr(){
+	SSRprotocol=$(echo ${protocol} | sed 's/_compatible//g')
+	SSRobfs=$(echo ${obfs} | sed 's/_compatible//g')
+	SSRPWDbase64=$(urlsafe_base64 "${password}")
+	SSRbase64=$(urlsafe_base64 "${ip}:${port}:${SSRprotocol}:${method}:${SSRobfs}:${SSRPWDbase64}")
+	SSRurl="ssr://${SSRbase64}"
+	SSRQRcode="https://api.qrserver.com/v1/create-qr-code/?data=${SSRurl}"
+	ssr_link=" SSR link: ${Red_font_prefix}${SSRurl}${Font_color_suffix} \n SSR QR код : ${Red_font_prefix}${SSRQRcode}${Font_color_suffix} \n "
+}
+ss_ssr_determine(){
+	protocol_suffix=`echo ${protocol} | awk -F "_" '{print $NF}'`
+	obfs_suffix=`echo ${obfs} | awk -F "_" '{print $NF}'`
+	if [[ ${protocol} = "origin" ]]; then
+		if [[ ${obfs} = "plain" ]]; then
+			ss_link_qr
+			ssr_link=""
+		else
+			if [[ ${obfs_suffix} != "compatible" ]]; then
+				ss_link=""
+			else
+				ss_link_qr
+			fi
+		fi
+	else
+		if [[ ${protocol_suffix} != "compatible" ]]; then
+			ss_link=""
+		else
+			if [[ ${obfs_suffix} != "compatible" ]]; then
+				if [[ ${obfs_suffix} = "plain" ]]; then
+					ss_link_qr
+				else
+					ss_link=""
+				fi
+			else
+				ss_link_qr
+			fi
+		fi
+	fi
+	ssr_link_qr
+}
 # Display configuration information
 View_User(){
 	SSR_installation_status
@@ -275,11 +341,12 @@ View_User_info(){
 	ss_ssr_determine
 	clear && echo "===================================================" && echo
 	echo -e " Информация о пользователе [${user_name}] ：" && echo
-	echo -e " IP\t    : ${Blue}${ip}${Font_color_suffix}"
-	echo -e " Порт\t    : ${Blue}${port}${Font_color_suffix}"
-	echo -e " Пароль\t    : ${Blue}${password}${Font_color_suffix}"
-  echo
-	echo -e " Использованный трафик : Upload: ${Yellow}${u}${Font_color_suffix} + Download: ${Yellow}${d}${Font_color_suffix} = ${Blue}${transfer_enable_Used_2}${Font_color_suffix}"
+	echo -e " IP\t    : ${Green_font_prefix}${ip}${Font_color_suffix}"
+	echo -e " Порт\t    : ${Green_font_prefix}${port}${Font_color_suffix}"
+	echo -e " Пароль\t    : ${Green_font_prefix}${password}${Font_color_suffix}"
+	echo
+	echo -e " Использованный трафик : Upload: ${Green_font_prefix}${u}${Font_color_suffix} + Download: ${Green_font_prefix}${d}${Font_color_suffix} = ${Green_font_prefix}${transfer_enable_Used_2}${Font_color_suffix}"
+	echo -e "${ss_link}"
 	echo && echo "==================================================="
 }
 # Создание юзера
@@ -288,7 +355,7 @@ Set_config_user(){
 	read -e -p "(По умолчанию: Admin):" ssr_user
 	[[ -z "${ssr_user}" ]] && ssr_user="Admin"
 	ssr_user=$(echo "${ssr_user}_$(date +"%d/%m")" |sed 's/ //g')
-	echo && echo ${Separator_1} && echo -e "	Имя пользователя : ${Blue}${ssr_user}${Font_color_suffix}" && echo ${Separator_1} && echo
+	echo && echo ${Separator_1} && echo -e "	Имя пользователя : ${Green_font_prefix}${ssr_user}${Font_color_suffix}" && echo ${Separator_1} && echo
 }
 Set_config_port(){
 	echo "Порт
@@ -304,7 +371,7 @@ Set_config_port(){
 		echo $((${ssr_port}+0)) &>/dev/null
 		if [[ $? == 0 ]]; then
 		if [[ ${ssr_port} -ge 1 ]] && [[ ${ssr_port} -le 65535 ]]; then
-			echo && echo ${Separator_1} && echo -e "	Порт: : ${Oceam}${ssr_port}${Font_color_suffix}" && echo ${Separator_1} && echo
+			echo && echo ${Separator_1} && echo -e "	Порт: : ${Green_font_prefix}${ssr_port}${Font_color_suffix}" && echo ${Separator_1} && echo
 			break
 		else
 			echo -e "${Error} Введите корректный порт(1-65535)"
@@ -321,7 +388,7 @@ Set_config_port(){
 			echo $((${ssr_port}+0)) &>/dev/null
 			if [[ $? == 0 ]]; then
 				if [[ ${ssr_port} -ge 1 ]] && [[ ${ssr_port} -le 65535 ]]; then
-					echo && echo ${Separator_1} && echo -e "	Порт: : ${Blue}${ssr_port}${Font_color_suffix}" && echo ${Separator_1} && echo
+					echo && echo ${Separator_1} && echo -e "	Порт: : ${Green_font_prefix}${ssr_port}${Font_color_suffix}" && echo ${Separator_1} && echo
 					break
 				else
 					echo -e "${Error} Введите корректный порт(1-65535)"
@@ -338,7 +405,7 @@ Set_config_port(){
 		echo $((${ssr_port}+0)) &>/dev/null
 		if [[ $? == 0 ]]; then
 			if [[ ${ssr_port} -ge 1 ]] && [[ ${ssr_port} -le 65535 ]]; then
-			echo && echo ${Separator_1} && echo -e "	Порт: : ${Blue}${ssr_port}${Font_color_suffix}" && echo ${Separator_1} && echo
+			echo && echo ${Separator_1} && echo -e "	Порт: : ${Green_font_prefix}${ssr_port}${Font_color_suffix}" && echo ${Separator_1} && echo
 			break
 			else
 			echo -e "${Error} Введите корректный порт(1-65535)"
@@ -362,10 +429,10 @@ Set_config_password(){
 	else 
 		ssr_password=${ssr_port}
 	fi
-	echo && echo ${Separator_1} && echo -e "	Пароль : ${Blue}${ssr_password}${Font_color_suffix}" && echo ${Separator_1} && echo
+	echo && echo ${Separator_1} && echo -e "	Пароль : ${Green_font_prefix}${ssr_password}${Font_color_suffix}" && echo ${Separator_1} && echo
 }
 Set_config_method(){
-ssr_method="chacha20-ietf"
+		ssr_method="chacha20-ietf"
 }
 Set_config_protocol(){
 ssr_protocol="origin"
@@ -398,6 +465,24 @@ Set_config_speed_limit_per_con(){
 	echo $((${ssr_speed_limit_per_con}+0)) &>/dev/null
 	if [[ $? == 0 ]]; then
 		if [[ ${ssr_speed_limit_per_con} -ge 1 ]] && [[ ${ssr_speed_limit_per_con} -le 131072 ]]; then
+			break
+		else
+			echo -e "${Error} Введите корректный номер(1-131072)"
+		fi
+	else
+		echo -e "${Error} Введите корректный номер(1-131072)"
+	fi
+	done
+}
+Set_config_speed_limit_per_user(){
+	while true
+	do
+	echo
+	ssr_speed_limit_per_user=""
+	[[ -z "$ssr_speed_limit_per_user" ]] && ssr_speed_limit_per_user=0 && break
+	echo $((${ssr_speed_limit_per_user}+0)) &>/dev/null
+	if [[ $? == 0 ]]; then
+		if [[ ${ssr_speed_limit_per_user} -ge 1 ]] && [[ ${ssr_speed_limit_per_user} -le 131072 ]]; then
 			break
 		else
 			echo -e "${Error} Введите корректный номер(1-131072)"
@@ -449,7 +534,7 @@ Set_config_enable(){
 		fi
 	done
 	if [[ "${enable}" == "1" ]]; then
-		echo -e "Порт [${ssr_port}] находится в состоянии：${Blue}включен${Font_color_suffix} , сменить статус на ${Red_font_prefix}выключен${Font_color_suffix} ?[Y/n]"
+		echo -e "Порт [${ssr_port}] находится в состоянии：${Green_font_prefix}включен${Font_color_suffix} , сменить статус на ${Red_font_prefix}выключен${Font_color_suffix} ?[Y/n]"
 		read -e -p "(По умолчанию: Y):" ssr_enable_yn
 		[[ -z "${ssr_enable_yn}" ]] && ssr_enable_yn="y"
 		if [[ "${ssr_enable_yn}" == [Yy] ]]; then
@@ -458,7 +543,7 @@ Set_config_enable(){
 			echo "Отмена..." && exit 0
 		fi
 	elif [[ "${enable}" == "0" ]]; then
-		echo -e "Порт [${ssr_port}] находится в состоянии：${Blue}отключен${Font_color_suffix} , сменить статус на  ${Red_font_prefix}включен${Font_color_suffix} ?[Y/n]"
+		echo -e "Порт [${ssr_port}] находится в состоянии：${Green_font_prefix}отключен${Font_color_suffix} , сменить статус на  ${Red_font_prefix}включен${Font_color_suffix} ?[Y/n]"
 		read -e -p "(По умолчанию: Y):" ssr_enable_yn
 		[[ -z "${ssr_enable_yn}" ]] && ssr_enable_yn = "y"
 		if [[ "${ssr_enable_yn}" == [Yy] ]]; then
@@ -477,7 +562,7 @@ Set_user_api_server_pub_addr(){
 		if [[ -z ${server_pub_addr} ]]; then
 			echo -e "${Error} Не удалось получить IP сервера！" && exit 1
 		else
-			echo -e "${Info} Текущий IP： ${Blue}${server_pub_addr}${Font_color_suffix}"
+			echo -e "${Info} Текущий IP： ${Green_font_prefix}${server_pub_addr}${Font_color_suffix}"
 		fi
 	fi
 	echo "Введите доменное имя или IP-адрес сервера"
@@ -498,7 +583,7 @@ Set_user_api_server_pub_addr(){
 			ssr_server_pub_addr="${ip}"
 		fi
 	fi
-	echo && echo ${Separator_1} && echo -e "	IP сервера : ${Blue}${ssr_server_pub_addr}${Font_color_suffix}" && echo ${Separator_1} && echo
+	echo && echo ${Separator_1} && echo -e "	IP сервера : ${Green_font_prefix}${ssr_server_pub_addr}${Font_color_suffix}" && echo ${Separator_1} && echo
 }
 Set_config_all(){
 	lal=$1
@@ -530,57 +615,57 @@ Set_config_all(){
 Modify_config_password(){
 	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -k "${ssr_password}"|grep -w "edit user ")
 	if [[ -z "${match_edit}" ]]; then
-		echo -e "${Error} Не удалось изменить пароль пользователя ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
+		echo -e "${Error} Не удалось изменить пароль пользователя ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
 	else
-		echo -e "${Info} Пароль пользователя успешно изменен ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
+		echo -e "${Info} Пароль пользователя успешно изменен ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
 	fi
 }
 Modify_config_method(){
 	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -m "${ssr_method}"|grep -w "edit user ")
 	if [[ -z "${match_edit}" ]]; then
-		echo -e "${Error} Не удалось изменить шифрование ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
+		echo -e "${Error} Не удалось изменить шифрование ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
 	else
-		echo -e "${Info} Шифрование успешно изменено ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
+		echo -e "${Info} Шифрование успешно изменено ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
 	fi
 }
 Modify_config_protocol(){
 	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -O "${ssr_protocol}"|grep -w "edit user ")
 	if [[ -z "${match_edit}" ]]; then
-		echo -e "${Error} Не удалось изменить протокол ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
+		echo -e "${Error} Не удалось изменить протокол ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
 	else
-		echo -e "${Info} Протокол успешно изменен ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
+		echo -e "${Info} Протокол успешно изменен ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
 	fi
 }
 Modify_config_obfs(){
 	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -o "${ssr_obfs}"|grep -w "edit user ")
 	if [[ -z "${match_edit}" ]]; then
-		echo -e "${Error} Не удалось изменить Obfs plugin ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
+		echo -e "${Error} Не удалось изменить Obfs plugin ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
 	else
-		echo -e "${Info} Obfs plugin успешно изменен ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
+		echo -e "${Info} Obfs plugin успешно изменен ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
 	fi
 }
 Modify_config_protocol_param(){
 	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -G "${ssr_protocol_param}"|grep -w "edit user ")
 	if [[ -z "${match_edit}" ]]; then
-		echo -e "${Error} Не удалось изменить лимит устройств ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
+		echo -e "${Error} Не удалось изменить лимит устройств ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
 	else
-		echo -e "${Info} Лимит устройств успешно изменен ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
+		echo -e "${Info} Лимит устройств успешно изменен ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
 	fi
 }
 Modify_config_speed_limit_per_con(){
 	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -s "${ssr_speed_limit_per_con}"|grep -w "edit user ")
 	if [[ -z "${match_edit}" ]]; then
-		echo -e "${Error} Не удалось изменить лимит скорости ключа ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
+		echo -e "${Error} Не удалось изменить лимит скорости ключа ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
 	else
-		echo -e "${Info} Лимит скорости ключа успешно изменен ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
+		echo -e "${Info} Лимит скорости ключа успешно изменен ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
 	fi
 }
 Modify_config_speed_limit_per_user(){
 	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -S "${ssr_speed_limit_per_user}"|grep -w "edit user ")
 	if [[ -z "${match_edit}" ]]; then
-		echo -e "${Error} Не удалось изменить лимит скорости пользователей ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
+		echo -e "${Error} Не удалось изменить лимит скорости пользователей ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
 	else
-		echo -e "${Info} Лимит скорости пользователей успешно изменен ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
+		echo -e "${Info} Лимит скорости пользователей успешно изменен ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
 	fi
 }
 Modify_config_connect_verbose_info(){
@@ -589,17 +674,17 @@ Modify_config_connect_verbose_info(){
 Modify_config_transfer(){
 	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -t "${ssr_transfer}"|grep -w "edit user ")
 	if [[ -z "${match_edit}" ]]; then
-		echo -e "${Error} Не удалось изменить общий трафик пользователя ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
+		echo -e "${Error} Не удалось изменить общий трафик пользователя ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
 	else
-		echo -e "${Info} Общий трафик пользователя успешно изменен ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
+		echo -e "${Info} Общий трафик пользователя успешно изменен ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
 	fi
 }
 Modify_config_forbid(){
 	match_edit=$(python mujson_mgr.py -e -p "${ssr_port}" -f "${ssr_forbid}"|grep -w "edit user ")
 	if [[ -z "${match_edit}" ]]; then
-		echo -e "${Error} Не удалось изменить запрещенные порты пользователя ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
+		echo -e "${Error} Не удалось изменить запрещенные порты пользователя ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} " && exit 1
 	else
-		echo -e "${Info} Запрещенные порты пользователя успешно изменены ${Blue}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
+		echo -e "${Info} Запрещенные порты пользователя успешно изменены ${Green_font_prefix}[Порт: ${ssr_port}]${Font_color_suffix} (Может занять около 10 секунд для обновления конфигурации)"
 	fi
 }
 Modify_config_enable(){
@@ -648,7 +733,7 @@ fi' >> "/usr/local/shadowsocksr/${del_user_port}checking.sh"
 			echo -e "\n* * * * * /bin/bash /usr/local/shadowsocksr/${del_user_port}checking.sh" >> "/usr/local/shadowsocksr/crontab.bak"
 		fi
 		crontab "/usr/local/shadowsocksr/crontab.bak"
-		echo -e "При подключении более 1 IP адреса к ключу с портом $del_user_port, пароль будет сменен на случайный."	
+		echo -e "При подключении более 1 IP-адреса к ключу с портом $del_user_port, пароль будет сменен на случайный."
 	else
 		echo -e "${Error} Введите корректный порт !"
 	fi	
@@ -689,40 +774,40 @@ Download_SSR(){
 	#git config --global http.sslVerify false
 	#env GIT_SSL_NO_VERIFY=true git clone -b manyuser https://github.com/ToyoDAdoubiBackup/shadowsocksr.git
 	#[[ ! -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR服务端 下载失败 !" && exit 1
-	[[ ! -e "manyuser.zip" ]] && echo -e "${Error} Не удалось скачать архив с ShadowsocksR !" && rm -rf manyuser.zip && exit 1
+	[[ ! -e "manyuser.zip" ]] && echo -e "${Error} Не удалось скачать архив с Shadowsocks !" && rm -rf manyuser.zip && exit 1
 	unzip "manyuser.zip"
-	[[ ! -e "/usr/local/shadowsocksr-manyuser/" ]] && echo -e "${Error} Ошибка распаковки ShadowsocksR !" && rm -rf manyuser.zip && exit 1
+	[[ ! -e "/usr/local/shadowsocksr-manyuser/" ]] && echo -e "${Error} Ошибка распаковки Shadowsocks !" && rm -rf manyuser.zip && exit 1
 	mv "/usr/local/shadowsocksr-manyuser/" "/usr/local/shadowsocksr/"
-	[[ ! -e "/usr/local/shadowsocksr/" ]] && echo -e "${Error} Переименование ShadowsocksR неуспешно !" && rm -rf manyuser.zip && rm -rf "/usr/local/shadowsocksr-manyuser/" && exit 1
+	[[ ! -e "/usr/local/shadowsocksr/" ]] && echo -e "${Error} Переименование Shadowsocks неуспешно !" && rm -rf manyuser.zip && rm -rf "/usr/local/shadowsocksr-manyuser/" && exit 1
 	rm -rf manyuser.zip
 	cd "shadowsocksr"
 	cp "${ssr_folder}/config.json" "${config_user_file}"
 	cp "${ssr_folder}/mysql.json" "${ssr_folder}/usermysql.json"
 	cp "${ssr_folder}/apiconfig.py" "${config_user_api_file}"
-	[[ ! -e ${config_user_api_file} ]] && echo -e "${Error} Не удалось скопировать apiconfig.py для ShadowsocksR !" && exit 1
+	[[ ! -e ${config_user_api_file} ]] && echo -e "${Error} Не удалось скопировать apiconfig.py для Shadowsocks !" && exit 1
 	sed -i "s/API_INTERFACE = 'sspanelv2'/API_INTERFACE = 'mudbjson'/" ${config_user_api_file}
 	server_pub_addr="127.0.0.1"
 	Modify_user_api_server_pub_addr
 	#sed -i "s/SERVER_PUB_ADDR = '127.0.0.1'/SERVER_PUB_ADDR = '${ip}'/" ${config_user_api_file}
 	sed -i 's/ \/\/ only works under multi-user mode//g' "${config_user_file}"
-	echo -e "${Info} ShadowsocksR успешно установлен !"
+	echo -e "${Info} Shadowsocks успешно установлен !"
 }
 Service_SSR(){
 	if [[ ${release} = "centos" ]]; then
 		if ! wget --no-check-certificate https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/service/ssrmu_centos -O /etc/init.d/ssrmu; then
-			echo -e "${Error} Не удалось загрузить скрипт для управления ShadowsocksR !" && exit 1
+			echo -e "${Error} Не удалось загрузить скрипт для управления Shadowsocks !" && exit 1
 		fi
 		chmod +x /etc/init.d/ssrmu
 		chkconfig --add ssrmu
 		chkconfig ssrmu on
 	else
 		if ! wget --no-check-certificate https://raw.githubusercontent.com/ToyoDAdoubiBackup/doubi/master/service/ssrmu_debian -O /etc/init.d/ssrmu; then
-			echo -e "${Error} Не удалось загрузить скрипт для управления ShadowsocksR !" && exit 1
+			echo -e "${Error} Не удалось загрузить скрипт для управления Shadowsocks !" && exit 1
 		fi
 		chmod +x /etc/init.d/ssrmu
 		update-rc.d -f ssrmu defaults
 	fi
-	echo -e "${Info} Скрипт для управления ShadowsocksR успешно установлен !"
+	echo -e "${Info} Скрипт для управления Shadowsocks успешно установлен !"
 }
 # 安装 JQ解析器
 JQ_install(){
@@ -753,7 +838,7 @@ Installation_dependency(){
 	Check_python
 	#echo "nameserver 8.8.8.8" > /etc/resolv.conf
 	#echo "nameserver 8.8.4.4" >> /etc/resolv.conf
-	\cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+	\cp -f /usr/share/zoneinfo/Asia/Ashgabat /etc/localtime
 	if [[ ${release} == "centos" ]]; then
 		/etc/init.d/crond restart
 	else
@@ -762,8 +847,8 @@ Installation_dependency(){
 }
 Install_SSR(){
 	check_root
-        apt-get update -y && apt install curl -y && apt install net-tools -y && apt install iptables -y
-	[[ -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR уже установлен !" && exit 1
+        apt-get update -y && apt install git -y && apt install curl -y && apt install net-tools -y && apt install iptables -y && apt install sudo -y
+	[[ -e ${ssr_folder} ]] && echo -e "${Error} Shadowsocks уже установлен !" && exit 1
 	echo -e "${Info} типа че то происходит..."
 	Set_user_api_server_pub_addr
 	Set_config_all
@@ -771,9 +856,9 @@ Install_SSR(){
 	Installation_dependency
 	echo -e "${Info} типа че то происходит..."
 	Download_SSR
-	echo -e "${Info} Загрузка ShadowSocks ядра.."
+	echo -e "${Info} типа че то происходит..."
 	Service_SSR
-	echo -e "${Info} ${Yellow}Установка ShadowSocks ядра...${Font_color_suffix}"
+	echo -e "${Info} типа че то происходит..."
 	JQ_install
 	echo -e "${Info} типа че то происходит..."
 	Add_port_user "install"
@@ -818,14 +903,14 @@ Install_SSR(){
 }
 Update_SSR(){
 	SSR_installation_status
-	echo -e "Данная функция отключена."
+	echo -e "Данная функция отключена"
 	#cd ${ssr_folder}
 	#git pull
 	#Restart_SSR
 }
 Uninstall_SSR(){
-	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} ShadowsocksR не установлен !" && exit 1
-	echo "Удалить ShadowsocksR？[y/N]" && echo
+	[[ ! -e ${ssr_folder} ]] && echo -e "${Error} Shadowsocks не установлен !" && exit 1
+	echo "Удалить Shadowsocks？[y/N]" && echo
 	read -e -p "(По умолчанию: n):" unyn
 	[[ -z ${unyn} ]] && unyn="n"
 	if [[ ${unyn} == [Yy] ]]; then
@@ -851,7 +936,7 @@ Uninstall_SSR(){
 			update-rc.d -f ssrmu remove
 		fi
 		rm -rf ${ssr_folder} && rm -rf /etc/init.d/ssrmu
-		echo && echo " ShadowsocksR успешно удален !" && echo
+		echo && echo " Shadowsocks успешно удален !" && echo
 	else
 		echo && echo " Отмена..." && echo
 	fi
@@ -860,7 +945,7 @@ Check_Libsodium_ver(){
 	echo -e "${Info} Начинаю получение последней версии libsodium..."
 	Libsodiumr_ver=$(wget -qO- "https://github.com/jedisct1/libsodium/tags"|grep "/jedisct1/libsodium/releases/tag/"|head -1|sed -r 's/.*tag\/(.+)\">.*/\1/')
 	[[ -z ${Libsodiumr_ver} ]] && Libsodiumr_ver=${Libsodiumr_ver_backup}
-	echo -e "${Info} Последняя версия libsodium: ${Blue}${Libsodiumr_ver}${Font_color_suffix} !"
+	echo -e "${Info} Последняя версия libsodium: ${Green_font_prefix}${Libsodiumr_ver}${Font_color_suffix} !"
 }
 # 显示 连接信息
 debian_View_user_connection_info(){
@@ -885,10 +970,10 @@ debian_View_user_connection_info(){
 			fi
 		fi
 		user_info_233=$(python mujson_mgr.py -l|grep -w "${user_port}"|awk '{print $2}'|sed 's/\[//g;s/\]//g')
-		user_list_all=${user_list_all}"Юзер: ${Yellow}"${user_info_233}"${Font_color_suffix} Порт: ${Yellow}"${user_port}"${Font_color_suffix} Кол-во IP: ${Yellow}"${user_IP_total}"${Font_color_suffix} Подкл. юзеры: ${Yellow}${user_IP}${Font_color_suffix}\n"
+		user_list_all=${user_list_all}"Юзер: ${Green_font_prefix}"${user_info_233}"${Font_color_suffix} Порт: ${Green_font_prefix}"${user_port}"${Font_color_suffix} Кол-во IP: ${Green_font_prefix}"${user_IP_total}"${Font_color_suffix} Подкл. юзеры: ${Green_font_prefix}${user_IP}${Font_color_suffix}\n"
 		user_IP=""
 	done
-	echo -e "Всего пользователей: ${Ocean} "${user_total}" ${Font_color_suffix} Общее число IP адресов: ${Ocean} "${IP_total}" ${Font_color_suffix} "
+	echo -e "Всего пользователей: ${Green_background_prefix} "${user_total}" ${Font_color_suffix} Общее число IP адресов: ${Green_background_prefix} "${IP_total}" ${Font_color_suffix} "
 	echo -e "${user_list_all}"
 }
 centos_View_user_connection_info(){
@@ -913,7 +998,7 @@ centos_View_user_connection_info(){
 			fi
 		fi
 		user_info_233=$(python mujson_mgr.py -l|grep -w "${user_port}"|awk '{print $2}'|sed 's/\[//g;s/\]//g')
-		user_list_all=${user_list_all}"Юзер: ${Blue}"${user_info_233}"${Font_color_suffix} Порт: ${Blue}"${user_port}"${Font_color_suffix} Кол-во IP: ${Blue}"${user_IP_total}"${Font_color_suffix} Подкл. юзеры: ${Blue}${user_IP}${Font_color_suffix}\n"
+		user_list_all=${user_list_all}"Юзер: ${Green_font_prefix}"${user_info_233}"${Font_color_suffix} Порт: ${Green_font_prefix}"${user_port}"${Font_color_suffix} Кол-во IP: ${Green_font_prefix}"${user_IP_total}"${Font_color_suffix} Подкл. юзеры: ${Green_font_prefix}${user_IP}${Font_color_suffix}\n"
 		user_IP=""
 	done
 	echo -e "Всего пользователей: ${Green_background_prefix} "${user_total}" ${Font_color_suffix} Всего IP адресов: ${Green_background_prefix} "${IP_total}" ${Font_color_suffix} "
@@ -979,21 +1064,21 @@ Modify_port(){
 Modify_Config(){
 	SSR_installation_status
 	echo && echo -e "Что вы хотите сделать？
- ${Blue}1.${Font_color_suffix}  Добавить новую конфигурацию
- ${Blue}2.${Font_color_suffix}  Удалить конфигурацию пользователя
+ ${Green_font_prefix}1.${Font_color_suffix}  Добавить новую конфигурацию
+ ${Green_font_prefix}2.${Font_color_suffix}  Удалить конфигурацию пользователя
 ————— Изменить конфигурацию пользователя —————
- ${Blue}3.${Font_color_suffix}  Изменить пароль пользователя
- ${Blue}4.${Font_color_suffix}  Изменить метод шифрования
- ${Blue}5.${Font_color_suffix}  Изменить протокол
- ${Blue}6.${Font_color_suffix}  Изменить obfs плагин
- ${Blue}7.${Font_color_suffix}  Изменить количество устройств
- ${Blue}8.${Font_color_suffix}  Изменить общий лимит скорости
- ${Blue}9.${Font_color_suffix}  Изменить лимит скорости у пользователя
- ${Blue}10.${Font_color_suffix} Изменить общий трафик
- ${Blue}11.${Font_color_suffix} Изменить запрещенные порты
- ${Blue}12.${Font_color_suffix} Изменить все конфигурации
+ ${Green_font_prefix}3.${Font_color_suffix}  Изменить пароль пользователя
+ ${Green_font_prefix}4.${Font_color_suffix}  Изменить метод шифрования
+ ${Green_font_prefix}5.${Font_color_suffix}  Изменить протокол
+ ${Green_font_prefix}6.${Font_color_suffix}  Изменить obfs плагин
+ ${Green_font_prefix}7.${Font_color_suffix}  Изменить количество устройств
+ ${Green_font_prefix}8.${Font_color_suffix}  Изменить общий лимит скорости
+ ${Green_font_prefix}9.${Font_color_suffix}  Изменить лимит скорости у пользователя
+ ${Green_font_prefix}10.${Font_color_suffix} Изменить общий трафик
+ ${Green_font_prefix}11.${Font_color_suffix} Изменить запрещенные порты
+ ${Green_font_prefix}12.${Font_color_suffix} Изменить все конфигурации
 ————— Другое —————
- ${Blue}13.${Font_color_suffix} Изменить IP адрес для пользователя
+ ${Green_font_prefix}13.${Font_color_suffix} Изменить IP адрес для пользователя
  
  ${Tip} Для изменения имени пользователя или порта используйте ручную модификацию !" && echo
 	read -e -p "(По умолчанию: отмена):" ssr_modify
@@ -1060,7 +1145,7 @@ List_port_user(){
 		user_username=$(echo "${user_info}"|sed -n "${integer}p"|awk '{print $2}'|sed 's/\[//g;s/\]//g')
 		Get_User_transfer "${user_port}"
 		transfer_enable_Used_233=$(echo $((${transfer_enable_Used_233}+${transfer_enable_Used_2_1})))
-		user_list_all=${user_list_all}"Пользователь: ${Yellow} "${user_username}"${Font_color_suffix} Порт: ${Yellow}"${user_port}"${Font_color_suffix} Трафик: ${Yellow}${transfer_enable_Used_2}${Font_color_suffix}\n"
+		user_list_all=${user_list_all}"Пользователь: ${Green_font_prefix} "${user_username}"${Font_color_suffix} Порт: ${Green_font_prefix}"${user_port}"${Font_color_suffix} Трафик: ${Green_font_prefix}${transfer_enable_Used_2}${Font_color_suffix}\n"
 	done
 	Get_User_transfer_all
 	echo && echo -e "=== Всего пользователей: ${Green_background_prefix} "${user_total}" ${Font_color_suffix}"
@@ -1081,39 +1166,15 @@ Add_port_user(){
 			[[ ! -z "${match_username}" ]] && echo -e "${Error} Имя пользователя [${ssr_user}] уже используется, выберите другое !" && exit 1
 			match_add=$(python mujson_mgr.py -a -u "${ssr_user}" -p "${ssr_port}" -k "${ssr_password}" -m "${ssr_method}" -O "${ssr_protocol}" -G "${ssr_protocol_param}" -o "${ssr_obfs}" -s "${ssr_speed_limit_per_con}" -S "${ssr_speed_limit_per_user}" -t "${ssr_transfer}" -f "${ssr_forbid}"|grep -w "add user info")
 			if [[ -z "${match_add}" ]]; then
-				echo -e "${Error} Не удалось добавить пользователя ${Blue}[Имя пользователя: ${ssr_user} , Порт: ${ssr_port}]${Font_color_suffix} "
+				echo -e "${Error} Не удалось добавить пользователя ${Green_font_prefix}[Имя пользователя: ${ssr_user} , Порт: ${ssr_port}]${Font_color_suffix} "
 				break
 			else
 				Add_iptables
 				Save_iptables
-				setiplimit
-				echo -e "${Info} Пользователь добавлен успешно ${Blue}[Пользователь: ${ssr_user} , Порт: ${ssr_port}]${Font_color_suffix} "
+				echo -e "${Info} Пользователь добавлен успешно ${Green_font_prefix}[Пользователь: ${ssr_user} , Порт: ${ssr_port}]${Font_color_suffix} "
 				echo
 				Get_User_info "${ssr_port}"
-				View_User_info
-				read -e -p "Хотите настроить автоудаление пользователя?[Y/n]:" autoyn
-				[[ -z ${autoyn} ]] && autoyn="y"
-				if [[ ${autoyn} == [Yy] ]]; then
-					apt install at
-					sudo systemctl enable --now atd
-					port=${ssr_port}
-					clear
-					echo
-					echo
-					echo
-					echo
-					echo		
-					read -e -p "Введите период удаления в днях:" periodofdel
-					at now +$periodofdel days <<ENDMARKER
-python "/usr/local/shadowsocksr/mujson_mgr.py" -d -p '${ssr_port}'
-ENDMARKER
-					clear
-					echo
-					echo
-					echo
-					echo -e "Пользователь с портом ${Blue}$ssr_port${Font_color_suffix} будет удален через $periodofdel дней."
-					break
-				fi					
+				View_User_info				
 				break
 			fi
 		done
@@ -1131,12 +1192,12 @@ Del_port_user(){
 			port=${del_user_port}
 			match_del=$(python mujson_mgr.py -d -p "${del_user_port}"|grep -w "delete user ")
 			if [[ -z "${match_del}" ]]; then
-				echo -e "${Error} Ошибка удаления пользователя! ${Blue}[Порт: ${del_user_port}]${Font_color_suffix} "
+				echo -e "${Error} Ошибка удаления пользователя! ${Green_font_prefix}[Порт: ${del_user_port}]${Font_color_suffix} "
 				break
 			else
 				Del_iptables
 				Save_iptables
-				echo -e "${Info} Удаление пользователя успешно завершено ${Blue}[Порт: ${del_user_port}]${Font_color_suffix} "
+				echo -e "${Info} Удаление пользователя успешно завершено ${Green_font_prefix}[Порт: ${del_user_port}]${Font_color_suffix} "
 				echo
 				read -e -p "Хотите продолжить удаление пользователей？[Y/n]:" delyn
 				[[ -z ${delyn} ]] && delyn="y"
@@ -1156,7 +1217,7 @@ Del_port_user(){
 Manually_Modify_Config(){
 	SSR_installation_status
 	nano ${config_user_mudb_file}
-	echo "Перезапустить ShadowsocksR？[Y/n]" && echo
+	echo "Перезапустить Shadowsocks？[Y/n]" && echo
 	read -e -p "(По умолчанию: y):" yn
 	[[ -z ${yn} ]] && yn="y"
 	if [[ ${yn} == [Yy] ]]; then
@@ -1166,11 +1227,11 @@ Manually_Modify_Config(){
 Clear_transfer(){
 	SSR_installation_status
 	echo && echo -e "Что вы хотите делать？
- ${Blue}1.${Font_color_suffix}  Удалить трафик, использованные одним пользователем
- ${Blue}2.${Font_color_suffix}  Удалить трафик всех пользователей
- ${Blue}3.${Font_color_suffix}  Запустить самоочистку трафика пользователей
- ${Blue}4.${Font_color_suffix}  Остановить самоочистку трафика пользователей
- ${Blue}5.${Font_color_suffix}  Модификация времени самоочистки трафика пользователей" && echo
+ ${Green_font_prefix}1.${Font_color_suffix}  Удалить трафик, использованные одним пользователем
+ ${Green_font_prefix}2.${Font_color_suffix}  Удалить трафик всех пользователей
+ ${Green_font_prefix}3.${Font_color_suffix}  Запустить самоочистку трафика пользователей
+ ${Green_font_prefix}4.${Font_color_suffix}  Остановить самоочистку трафика пользователей
+ ${Green_font_prefix}5.${Font_color_suffix}  Модификация времени самоочистки трафика пользователей" && echo
 	read -e -p "(По умолчанию: Отмена):" ssr_modify
 	[[ -z "${ssr_modify}" ]] && echo "Отмена..." && exit 1
 	if [[ ${ssr_modify} == "1" ]]; then
@@ -1209,9 +1270,9 @@ Clear_transfer_one(){
 		if [[ ! -z ${Clear_transfer_user} ]]; then
 			match_clear=$(python mujson_mgr.py -c -p "${Clear_transfer_user_port}"|grep -w "clear user ")
 			if [[ -z "${match_clear}" ]]; then
-				echo -e "${Error} Не удалось очистить трафик пользователя! ${Blue}[Порт: ${Clear_transfer_user_port}]${Font_color_suffix} "
+				echo -e "${Error} Не удалось очистить трафик пользователя! ${Green_font_prefix}[Порт: ${Clear_transfer_user_port}]${Font_color_suffix} "
 			else
-				echo -e "${Info} Трафик пользователя успешно очищен! ${Blue}[Порт: ${Clear_transfer_user_port}]${Font_color_suffix} "
+				echo -e "${Info} Трафик пользователя успешно очищен! ${Green_font_prefix}[Порт: ${Clear_transfer_user_port}]${Font_color_suffix} "
 			fi
 			break
 		else
@@ -1229,9 +1290,9 @@ Clear_transfer_all(){
 		user_port=$(echo "${user_info}"|sed -n "${integer}p"|awk '{print $4}')
 		match_clear=$(python mujson_mgr.py -c -p "${user_port}"|grep -w "clear user ")
 		if [[ -z "${match_clear}" ]]; then
-			echo -e "${Error} Не удалось очистить трафик пользователя!  ${Blue}[Порт: ${user_port}]${Font_color_suffix} "
+			echo -e "${Error} Не удалось очистить трафик пользователя!  ${Green_font_prefix}[Порт: ${user_port}]${Font_color_suffix} "
 		else
-			echo -e "${Info} Трафик пользователя успешно очищен! ${Blue}[Порт: ${user_port}]${Font_color_suffix} "
+			echo -e "${Info} Трафик пользователя успешно очищен! ${Green_font_prefix}[Порт: ${user_port}]${Font_color_suffix} "
 		fi
 	done
 	echo -e "${Info} Весь трафик пользователей успешно очищен !"
@@ -1270,24 +1331,24 @@ Set_crontab(){
 		echo -e "Введите временный интервал для очистки трафика
  === Описание формата ===
  * * * * * Минуты, часы, дни, месяцы, недели
- ${Blue} 0 2 1 * * ${Font_color_suffix} Означает каждый месяц 1-го числа в 2 часа
- ${Blue} 0 2 15 * * ${Font_color_suffix} Означает каждый месяц 15-го числа в 2 часа
- ${Blue} 0 2 */7 * * ${Font_color_suffix} Каждые 7 дней в 2 часа
- ${Blue} 0 2 * * 0 ${Font_color_suffix} Каждое воскресенье
- ${Blue} 0 2 * * 3 ${Font_color_suffix} Каждую среду" && echo
+ ${Green_font_prefix} 0 2 1 * * ${Font_color_suffix} Означает каждый месяц 1-го числа в 2 часа
+ ${Green_font_prefix} 0 2 15 * * ${Font_color_suffix} Означает каждый месяц 15-го числа в 2 часа
+ ${Green_font_prefix} 0 2 */7 * * ${Font_color_suffix} Каждые 7 дней в 2 часа
+ ${Green_font_prefix} 0 2 * * 0 ${Font_color_suffix} Каждое воскресенье
+ ${Green_font_prefix} 0 2 * * 3 ${Font_color_suffix} Каждую среду" && echo
 	read -e -p "(По умолчанию: 0 2 1 * * Тоесть каждое 1-е число месяца в 2 часа):" Crontab_time
 	[[ -z "${Crontab_time}" ]] && Crontab_time="0 2 1 * *"
 }
 Start_SSR(){
 	SSR_installation_status
 	check_pid
-	[[ ! -z ${PID} ]] && echo -e "${Error} ShadowsocksR запущен !" && exit 1
+	[[ ! -z ${PID} ]] && echo -e "${Error} Shadowsocks запущен !" && exit 1
 	/etc/init.d/ssrmu start
 }
 Stop_SSR(){
 	SSR_installation_status
 	check_pid
-	[[ -z ${PID} ]] && echo -e "${Error} ShadowsocksR не запущен !" && exit 1
+	[[ -z ${PID} ]] && echo -e "${Error} Shadowsocks не запущен !" && exit 1
 	/etc/init.d/ssrmu stop
 }
 OpenVPN(){
@@ -1298,7 +1359,7 @@ Server_IP_Checker(){
 }
 View_Log(){
 	SSR_installation_status
-	[[ ! -e ${ssr_log_file} ]] && echo -e "${Error} Лог ShadowsocksR не существует !" && exit 1
+	[[ ! -e ${ssr_log_file} ]] && echo -e "${Error} Лог Shadowsocks не существует !" && exit 1
 	echo && echo -e "${Tip} Нажмите ${Red_font_prefix}Ctrl+C${Font_color_suffix} для остановки просмотра лога" && echo -e "Если вам нужен полный лог, то напишите ${Red_font_prefix}cat ${ssr_log_file}${Font_color_suffix} 。" && echo
 	tail -f ${ssr_log_file}
 }
@@ -1316,9 +1377,9 @@ menu_status(){
 	if [[ -e ${ssr_folder} ]]; then
 		check_pid
 		if [[ ! -z "${PID}" ]]; then
-			echo -e " Текущий статус: ${Blue}установлен${Font_color_suffix} и ${Blue}запущен${Font_color_suffix}"
+			echo -e " Текущий статус: ${Green_font_prefix}установлен${Font_color_suffix} и ${Green_font_prefix}запущен${Font_color_suffix}"
 		else
-			echo -e " Текущий статус: ${Blue}установлен${Font_color_suffix} но ${Red_font_prefix}не запущен${Font_color_suffix}"
+			echo -e " Текущий статус: ${Green_font_prefix}установлен${Font_color_suffix} но ${Red_font_prefix}не запущен${Font_color_suffix}"
 		fi
 		cd "${ssr_folder}"
 	else
@@ -1326,17 +1387,16 @@ menu_status(){
 	fi
 }
 Upload_DB(){
-	echo -e "${Blue}Перед вам выйдет строка с ссылкой на файлообменник, откуда вы сможете скачать базу данных. 
-	Пример строки:{'success':'true','key':**********,'link':https://file.io/***********,'expiry':14 days} 
-	Введите строку из поля 'link' в браузере, и ваша база данных будет скачана. ${Font_color_suffix}"
-	curl -F "file=@/usr/local/shadowsocksr/mudb.json" "https://file.io" && echo -e "${Blue}Закрытие скрипта...${Font_color_suffix}"
+ 	upload_link="$(curl -F "file=@/usr/local/shadowsocksr/mudb.json" "https://file.io" | cut -b 46-73)" && clear
+	echo -e "${Red} $upload_link${Font_color_suffix} - ${Green}Ссылка на скачивание Базы ShadowSocks
+ База ShadowSocks успешно выгружена!"${Font_color_suffix}
 }
 Download_DB(){
-	echo -e "${Blue} Внимание: это приведет к перезаписи всей базы пользователей, вы уверены что хотите продолжить?${Font_color_suffix}(y/n)"
+	echo -e "${Green}Загрузить Базу по ссылке?${Font_color_suffix}${Red} ВНИМАНИЕ: ПРОДОЛЖЕНИЕ ПРИВЕДЕТ К ПЕРЕЗАПИСИ УСТАНОВЛЕННОЙ БАЗЫ!${Font_color_suffix}${Green}(y/n)"
 	read -e -p "(По умолчанию: отмена):" base_override
-	[[ -z "${base_override}" ]] && echo "Отмена..." && exit 1
+	[[ -z "${base_override}" ]] && echo "Отмена...${Font_color_suffix}" && exit 1
 	if [[ ${base_override} == "y" ]]; then
-		read -e -p "${Blue} Введите ссылку на базу: (полученная в 15 пункте):(Если вы ее не сделали, то введите 'n')${Font_color_suffix}" base_link && echo
+		read -e -p "${Green_font_prefix} Введите ссылку на Базу:(Если вы ее не сделали, то введите 'n')${Font_color_suffix}" base_link && echo
 		[[ -z "${base_link}" ]] && echo "Отмена..." && exit 1
 		if [[ ${base_link} == "n" ]]; then
    echo "Отмена..." && exit 1
@@ -1362,43 +1422,43 @@ else
         domainofserver=$(cat ${config_user_api_file} | grep "SERVER_PUB_ADDR = " | awk -F "[']" '{print $2}')
         serverip123=$(curl ifconfig.me)
         user_info=$(python "/usr/local/shadowsocksr/mujson_mgr.py" -l)
-		user_total=$(echo "${user_info}"|wc -l)
+		    user_total=$(echo "${user_info}" | wc -l)
 	clear
 	echo
 	echo
-	echo  -e "${Yellow}Chieftain && xyl1gun4eg && VeroN [SSpro Control]${Font_color_suffix} "
+	echo  -e "${Red}Chieftain && xyl1gun4eg && VeroN [SSpro Control]${Font_color_suffix} "
 	echo
-        echo -e "Приветствую, администратор сервера!  Дата: ${Blue}$(date +"%d-%m-%Y")"${Font_color_suffix}
+        echo -e "Приветствую, администратор сервера!  Дата: $(date +"%d-%m-%Y")"
         echo -e "
- IP сервера: ${Blue}$serverip123${Font_color_suffix}
- Ты на сервере: ${Blue}$domainofserver${Font_color_suffix}
- Клиентов на сервере: ${Blue}$user_total
-${Blue}|————————————————————————————————————|${Font_color_suffix}
-|${Blue}0.${Font_color_suffix} ${Yellow}Выход${Font_color_suffix}                            |
-|${Blue}————————${Font_color_suffix} Создание / Удаление ${Blue}———————${Font_color_suffix}|
-|${Blue}1.${Font_color_suffix} ${Yellow}Создать ключ${Font_color_suffix}                     |
-|${Blue}2.${Font_color_suffix} ${Yellow}Удалить ключ${Font_color_suffix}                     |
-|${Blue}3.${Font_color_suffix} ${Yellow}Изменить пароль ключа${Font_color_suffix}            |
-|${Blue}4.${Font_color_suffix} ${Yellow}Информация о клиентах${Font_color_suffix}            |
-|${Blue}5.${Font_color_suffix} ${Yellow}Показать подключенные IP-адреса${Font_color_suffix}  |
-|${Blue}————————${Font_color_suffix} Управление базой ${Blue}——————————${Font_color_suffix}|
-|${Blue}6.${Font_color_suffix} ${Yellow}Выгрузить Базу${Font_color_suffix}                   |
-|${Blue}7.${Font_color_suffix} ${Yellow}Загрузить Базу${Font_color_suffix}                   |
-|${Blue}8.${Font_color_suffix} ${Yellow}Редактирование Базы${Font_color_suffix}              |
-|${Blue}9.${Font_color_suffix} ${Yellow}Изменить адрес сервера${Font_color_suffix}           |
-|${Blue}————————${Font_color_suffix} Управление скриптом ${Blue}———————${Font_color_suffix}|
-|${Blue}10.${Font_color_suffix} ${Yellow}Очистка трафика пользователей${Font_color_suffix}   |
-|${Blue}11.${Font_color_suffix} ${Yellow}Включить Shadowsocks${Font_color_suffix}            |
-|${Blue}12.${Font_color_suffix} ${Yellow}Выключить Shadowsocks${Font_color_suffix}           |
-|${Blue}13.${Font_color_suffix} ${Yellow}Перезапустить Shadowsocks${Font_color_suffix}       |
-|${Blue}————————${Font_color_suffix} Установка скрипта ${Blue}—————————${Font_color_suffix}|
-|${Blue}14.${Font_color_suffix} ${Yellow}Установить Shadowsocks${Font_color_suffix}          |
-|${Blue}15.${Font_color_suffix} ${Yellow}Удалить Shadowsocks${Font_color_suffix}             |
-${Blue}|————————————————————————————————————|${Font_color_suffix}
+ IP сервера: $serverip123
+ Ты на сервере: ${Green_background_prefix}$domainofserver${Font_color_suffix}
+ Клиентов на сервере: $user_total
+${Ocean}|————————————————————————————————————|${Font_color_suffix}
+|${Ocean}0.${Font_color_suffix} ${Yellow}Выход${Font_color_suffix}                            |
+|${Ocean}————————${Font_color_suffix} Создание / Удаление ${Ocean}———————${Font_color_suffix}|
+|${Ocean}1.${Font_color_suffix} ${Yellow}Создать ключ${Font_color_suffix}                     |
+|${Ocean}2.${Font_color_suffix} ${Yellow}Удалить ключ${Font_color_suffix}                     |
+|${Ocean}3.${Font_color_suffix} ${Yellow}Изменить пароль ключа${Font_color_suffix}            |
+|${Ocean}4.${Font_color_suffix} ${Yellow}Информация о клиентах${Font_color_suffix}            |
+|${Ocean}5.${Font_color_suffix} ${Yellow}Показать подключенные IP-адреса${Font_color_suffix}  |
+|${Ocean}————————${Font_color_suffix} Управление базой ${Ocean}——————————${Font_color_suffix}|
+|${Ocean}6.${Font_color_suffix} ${Yellow}Выгрузить Базу${Font_color_suffix}                   |
+|${Ocean}7.${Font_color_suffix} ${Yellow}Загрузить Базу${Font_color_suffix}                   |
+|${Ocean}8.${Font_color_suffix} ${Yellow}Редактирование Базы${Font_color_suffix}              |
+|${Ocean}9.${Font_color_suffix} ${Yellow}Изменить адрес сервера${Font_color_suffix}           |
+|${Ocean}————————${Font_color_suffix} Управление скриптом ${Ocean}———————${Font_color_suffix}|
+|${Ocean}10.${Font_color_suffix} ${Yellow}Очистка трафика пользователей${Font_color_suffix}   |
+|${Ocean}11.${Font_color_suffix} ${Yellow}Включить Shadowsocks${Font_color_suffix}            |
+|${Ocean}12.${Font_color_suffix} ${Yellow}Выключить Shadowsocks${Font_color_suffix}           |
+|${Ocean}13.${Font_color_suffix} ${Yellow}Перезапустить Shadowsocks${Font_color_suffix}       |
+|${Ocean}————————${Font_color_suffix} Установка скрипта ${Ocean}—————————${Font_color_suffix}|
+|${Ocean}14.${Font_color_suffix} ${Yellow}Установить Shadowsocks${Font_color_suffix}          |
+|${Ocean}15.${Font_color_suffix} ${Yellow}Удалить Shadowsocks${Font_color_suffix}             |
+${Ocean}|————————————————————————————————————|${Font_color_suffix}
  "
 
 	menu_status
-	echo && read -e -p "Введите корректный номер [0-16]：" num
+	echo && read -e -p "Введите корректный номер [0-15]：" num
 case "$num" in
 	0)
 	Fastexit
@@ -1452,7 +1512,7 @@ case "$num" in
 	Uninstall_SSR
 	;;
 	*)
-	echo -e "${Error} Введите корректный номер [0-16]"
+	echo -e "${Error} Введите корректный номер [0-15]"
 	;;
 esac
 fi
