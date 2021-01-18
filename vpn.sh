@@ -1381,26 +1381,26 @@ else
  Ты на сервере: ${Blue}$domainofserver${Font_color_suffix}
  Клиентов на сервере: ${Blue}$user_total${Font_color_suffix}
 ${Blue}|————————————————————————————————————|${Font_color_suffix}
-|${Blue}0.${Font_color_suffix} ${Yellow}Выход${Font_color_suffix}                            |
-|${Blue}————————${Font_color_suffix} Создание / Удаление ${Blue}———————${Font_color_suffix}|
-|${Blue}1.${Font_color_suffix} ${Yellow}Создать ключ${Font_color_suffix}                     |
-|${Blue}2.${Font_color_suffix} ${Yellow}Удалить ключ${Font_color_suffix}                     |
-|${Blue}3.${Font_color_suffix} ${Yellow}Изменить пароль ключа${Font_color_suffix}            |
-|${Blue}4.${Font_color_suffix} ${Yellow}Информация о клиентах${Font_color_suffix}            |
-|${Blue}5.${Font_color_suffix} ${Yellow}Показать подключенные IP-адреса${Font_color_suffix}  |
-|${Blue}————————${Font_color_suffix} Управление базой ${Blue}——————————${Font_color_suffix}|
-|${Blue}6.${Font_color_suffix} ${Yellow}Выгрузить Базу${Font_color_suffix}                   |
-|${Blue}7.${Font_color_suffix} ${Yellow}Загрузить Базу${Font_color_suffix}                   |
-|${Blue}8.${Font_color_suffix} ${Yellow}Редактирование Базы${Font_color_suffix}              |
-|${Blue}9.${Font_color_suffix} ${Yellow}Изменить адрес сервера${Font_color_suffix}           |
-|${Blue}————————${Font_color_suffix} Управление скриптом ${Blue}———————${Font_color_suffix}|
-|${Blue}10.${Font_color_suffix} ${Yellow}Очистка трафика пользователей${Font_color_suffix}   |
-|${Blue}11.${Font_color_suffix} ${Yellow}Включить Shadowsocks${Font_color_suffix}            |
-|${Blue}12.${Font_color_suffix} ${Yellow}Выключить Shadowsocks${Font_color_suffix}           |
-|${Blue}13.${Font_color_suffix} ${Yellow}Перезапустить Shadowsocks${Font_color_suffix}       |
-|${Blue}————————${Font_color_suffix} Установка скрипта ${Blue}—————————${Font_color_suffix}|
-|${Blue}14.${Font_color_suffix} ${Yellow}Установить Shadowsocks${Font_color_suffix}          |
-|${Blue}15.${Font_color_suffix} ${Yellow}Удалить Shadowsocks${Font_color_suffix}             |
+${Blue}|${Font_color_suffix}${Blue}0.${Font_color_suffix} ${Yellow}Выход${Font_color_suffix}                            ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}————————${Font_color_suffix} Управление ключами ${Blue}————————${Font_color_suffix}${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}1.${Font_color_suffix} ${Yellow}Создать ключ${Font_color_suffix}                     ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}2.${Font_color_suffix} ${Yellow}Удалить ключ${Font_color_suffix}                     ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}3.${Font_color_suffix} ${Yellow}Изменить пароль ключа${Font_color_suffix}            ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}4.${Font_color_suffix} ${Yellow}Информация о клиентах${Font_color_suffix}            ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}5.${Font_color_suffix} ${Yellow}Показать подключенные IP-адреса${Font_color_suffix}  ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}————————${Font_color_suffix} Управление базой ${Blue}——————————${Font_color_suffix}${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}6.${Font_color_suffix} ${Yellow}Выгрузить Базу${Font_color_suffix}                   ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}7.${Font_color_suffix} ${Yellow}Загрузить Базу${Font_color_suffix}                   ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}8.${Font_color_suffix} ${Yellow}Редактирование Базы${Font_color_suffix}              ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}9.${Font_color_suffix} ${Yellow}Изменить адрес сервера${Font_color_suffix}           ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}————————${Font_color_suffix} Управление скриптом ${Blue}———————${Font_color_suffix}${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}10.${Font_color_suffix} ${Yellow}Включить ShadowSocks${Font_color_suffix}            ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}11.${Font_color_suffix} ${Yellow}Выключить ShadowSocks${Font_color_suffix}           ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}12.${Font_color_suffix} ${Yellow}Перезапустить ShadowSocks${Font_color_suffix}       ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}13.${Font_color_suffix} ${Yellow}Очистка трафика пользователей${Font_color_suffix}   ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}————————${Font_color_suffix} Установка скрипта ${Blue}—————————${Font_color_suffix}${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}14.${Font_color_suffix} ${Yellow}Установить ShadowSocks${Font_color_suffix}          ${Blue}|${Font_color_suffix}
+${Blue}|${Font_color_suffix}${Blue}15.${Font_color_suffix} ${Yellow}Удалить ShadowSocks${Font_color_suffix}             ${Blue}|${Font_color_suffix}
 ${Blue}|————————————————————————————————————|${Font_color_suffix}
  "
 
@@ -1441,16 +1441,16 @@ case "$num" in
 	Modify_user_api_server_pub_addr
 	;;
 	10)
-	Clear_transfer
-	;;
-	11)
 	Start_SSR
 	;;
-	12)
+	11)
 	Stop_SSR
 	;;
-	13)
+	12)
 	Restart_SSR
+	;;
+	13)
+	Clear_transfer
 	;;
 	14)
 	Install_SSR
