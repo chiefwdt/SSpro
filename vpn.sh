@@ -797,6 +797,8 @@ Installation_dependency(){
 Install_SSR(){
 	check_root
 	[[ -e ${ssr_folder} ]] && echo -e "${Error} Shadowsocks уже установлен !" && exit 1
+  Create_Aliases
+  source ~/.bash_aliases
 	echo -e "${Info} Загрузка..."
 	Set_user_api_server_pub_addr
 	Set_config_all
@@ -1356,6 +1358,22 @@ else
 fi
 	elif [[ ${base_override} == "n" ]]; then
 		echo "Отмена..." && exit 1
+	fi
+}
+Create_Aliases(){
+	if ! { [[ -f ~/.bash_aliases ]] && grep -q "SSpro" ~/.bash_aliases; }; then
+		cat << EOF >> ~/.bash_aliases
+alias p='bash /root/SSpro/vpn.sh'
+alias o='bash /root/PrivateScript/ovpn.sh'
+EOF
+		chmod 644 ~/.bash_aliases
+	fi
+
+	if ! { [[ -f ~/.bashrc ]] && grep -q "bash_aliases" ~/.bashrc; }; then
+		cat << EOF >> ~/.bashrc
+if [ -f ~/.bash_aliases ]; then . ~/.bash_aliases fi
+EOF
+		chmod 644 ~/.bashrc
 	fi
 }
 cd /usr/local/shadowsocksr
