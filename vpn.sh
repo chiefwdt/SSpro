@@ -1337,7 +1337,7 @@ menu_status(){
 	fi
 }
 Upload_DB(){
- 	upload_link="$(curl -F "file=@/usr/local/shadowsocksr/mudb.json" "https://file.io" | cut -b 121-150)" && clear
+ 	upload_link="$(curl -F "file=@/usr/local/shadowsocksr/mudb.json" "https://file.io" | jq ".link")" && clear
 	echo -e "${Red} $upload_link${Font_color_suffix} - ${Blue}Ссылка на скачивание Базы ShadowSocks
  База ShadowSocks успешно выгружена!"${Font_color_suffix}
 }
