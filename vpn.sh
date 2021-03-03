@@ -835,7 +835,7 @@ Install_SSR(){
 		./configure --disable-maintainer-mode && make -j2 && make install
 		echo /usr/local/lib > /etc/ld.so.conf.d/usr_local_lib.conf
 	else
-    apt-get update -y && apt install git -y && apt install curl -y && apt install net-tools -y && apt install iptables -y && apt install sudo -y
+    apt-get update -y && apt install git -y && apt install curl -y && apt install net-tools -y && apt install iptables -y && apt install sudo -y && apt install jq -y
 		echo -e "${Info} Загрузка..."
 		apt-get install -y build-essential
 		echo -e "${Info} Скачивание..."
@@ -1364,7 +1364,7 @@ Create_Aliases(){
 	if ! { [[ -f ~/.bash_aliases ]] && grep -q "SSpro" ~/.bash_aliases; }; then
 		cat << EOF >> ~/.bash_aliases
 alias p='bash /root/SSpro/vpn.sh'
-alias o='bash /root/PrivateScript/ovpn.sh'
+alias o='bash /root/OVpro/ovpn.sh'
 EOF
 		chmod 644 ~/.bash_aliases
 	fi
