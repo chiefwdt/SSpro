@@ -1,4 +1,4 @@
-# !/usr/bin/env bash
+#!/usr/bin/env bash
 # SSpro by Chieftain && xyl1gun4eg && VeroN
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
@@ -1121,7 +1121,7 @@ Add_port_user(){
 			else
 				Add_iptables
 				Save_iptables
-				echo -e "${Info} Пользователь добавлен успешно ${Blue}[Пользователь: ${ssr_user} , Порт: ${ssr_port}]${Font_color_suffix} "
+				echo -e "${Info}Пользователь добавлен успешно ${Blue}[Пользователь: ${ssr_user} , Порт: ${ssr_port}]${Font_color_suffix} "
 				echo
 				Get_User_info "${ssr_port}"
 				View_User_info
@@ -1130,9 +1130,8 @@ Add_port_user(){
 		done
 	fi
 }
-Del_port_user(){
-	List_port_user
-	while true
+again_delete(){
+  	while true
 	do
 		echo -e "Введите порт пользователя для удаления"
 		read -e -p "(По умолчанию: отмена):" del_user_port
@@ -1142,25 +1141,54 @@ Del_port_user(){
 			port=${del_user_port}
 			match_del=$(python mujson_mgr.py -d -p "${del_user_port}"|grep -w "delete user ")
 			if [[ -z "${match_del}" ]]; then
-				echo -e "${Error} Ошибка удаления пользователя! ${Blue}[Порт: ${del_user_port}]${Font_color_suffix} "
+				echo -e "${Error}Ошибка удаления пользователя! ${Blue}[Порт: ${del_user_port}]${Font_color_suffix} "
 				break
 			else
-				Del_iptables
-				Save_iptables
-				echo -e "${Info} Удаление пользователя успешно завершено ${Blue}[Порт: ${del_user_port}]${Font_color_suffix} "
-				echo
+				echo -e "${Info}Удаление пользователя успешно завершено ${Blue}[Порт: ${del_user_port}]${Font_color_suffix} "
 				read -e -p "Хотите продолжить удаление пользователей？[Y/n]:" delyn
 				[[ -z ${delyn} ]] && delyn="y"
 				if [[ ${delyn} == [Nn] ]]; then
-					break
+				break
 				else
-					echo -e "${Info} Продолжение удаления пользователей..."
-					Del_port_user
+					again_delete
 				fi
 			fi
 			break
 		else
-			echo -e "${Error} Введите корректный порт !"
+			echo -e "${Error}Введите корректный порт !"
+		fi
+	done
+}
+Del_port_user(){
+	List_port_user
+	while true
+	do
+
+		echo -e "Введите порт пользователя для удаления"
+		read -e -p "(По умолчанию: отмена):" del_user_port
+		[[ -z "${del_user_port}" ]] && echo -e "Отмена..." && exit 1
+		del_user=$(cat "${config_user_mudb_file}"|grep '"port": '"${del_user_port}"',')
+		if [[ ! -z ${del_user} ]]; then
+			port=${del_user_port}
+			match_del=$(python mujson_mgr.py -d -p "${del_user_port}"|grep -w "delete user ")
+			if [[ -z "${match_del}" ]]; then
+				echo -e "${Error}Ошибка удаления пользователя! ${Blue}[Порт: ${del_user_port}]${Font_color_suffix} "
+				break
+			else
+				#Del_iptables
+				#Save_iptables
+				echo -e "${Info}Удаление пользователя успешно завершено ${Blue}[Порт: ${del_user_port}]${Font_color_suffix} "
+				read -e -p "Хотите продолжить удаление пользователей？[Y/n]:" delyn
+				[[ -z ${delyn} ]] && delyn="y"
+				if [[ ${delyn} == [Nn] ]]; then
+				break
+				else
+					again_delete
+				fi
+			fi
+			break
+		else
+			echo -e "${Error}Введите корректный порт !"
 		fi
 	done
 }
