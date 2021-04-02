@@ -1388,11 +1388,6 @@ fi
 		echo "Отмена..." && exit 1
 	fi
 }
-Balansirowka(){
-upload_link="$(curl -F "file=@/usr/local/shadowsocksr/mudb.json" "https://file.io" | jq ".link")"
-sshpass -p balans ssh -o StrictHostKeyChecking=no root@balans.felytweb.xyz curl -o "/usr/local/shadowsocksr/mudb.json" "${upload_link}"
-echo "База успешно обновлена на балансёре"
-}
 Create_Aliases(){
 	if ! { [[ -f ~/.bash_aliases ]] && grep -q "SSpro" ~/.bash_aliases; }; then
 		cat << EOF >> ~/.bash_aliases
@@ -1509,9 +1504,6 @@ case "$num" in
 	15)
 	Uninstall_SSR
 	;;
-        777)
-        Balansirowka
-        ;;
 	*)
 	echo -e "${Error} Введите корректный номер [0-15]"
 	;;
