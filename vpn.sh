@@ -835,7 +835,7 @@ Install_SSR(){
 		./configure --disable-maintainer-mode && make -j2 && make install
 		echo /usr/local/lib > /etc/ld.so.conf.d/usr_local_lib.conf
 	else
-    apt-get update -y && apt install git -y && apt install curl -y && apt install net-tools -y && apt install iptables -y && apt install sudo -y && apt install jq -y
+    apt-get update -y && apt install git -y && apt install curl -y && apt install net-tools -y && apt install iptables -y && apt install sudo -y && apt install jq -y && apt install sshpass -y
 		echo -e "${Info} Загрузка..."
 		apt-get install -y build-essential
 		echo -e "${Info} Скачивание..."
